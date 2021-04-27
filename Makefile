@@ -1,6 +1,6 @@
 TARGET	:= solder_workspace_lighting
 RTOS    := freertos
-DEVICE	:= stm32l01d3
+DEVICE	:= stm32l432
 
 INCDIRS			:=  \
 src 				\
