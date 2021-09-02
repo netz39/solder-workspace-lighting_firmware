@@ -6,6 +6,7 @@ INCDIRS			:=  \
 src 				\
 
 SOURCES			:=  \
+src/leds.cxx        \
 src/main.cxx
 
 # Actual build engine
