@@ -1,0 +1,65 @@
+Checks: abseil-*,
+
+        altera-struct-pack-align,
+
+        bugprone-*,
+        -bugprone-bool-pointer-implicit-conversion,
+        -bugprone-exception-escape,
+        -bugprone-infinite-loop,
+        -bugprone-signed-char-misuse,
+
+        boost-*,
+
+        cert-dcl03-c,
+        cert-dcl21-cpp,
+        cert-dcl58-cpp,
+        cert-err34-c,
+        cert-err52-cpp,
+        cert-err58-cpp,
+        cert-err60-cpp,
+        cert-flp30-c,
+        cert-msc50-cpp,
+        cert-msc51-cpp,
+        cert-oop54-cpp,
+
+        cppcoreguidelines-interfaces-global-init,
+        cppcoreguidelines-narrowing-conversions,
+        cppcoreguidelines-pro-type-member-init,
+        cppcoreguidelines-pro-type-static-cast-downcast,
+        cppcoreguidelines-slicing,
+
+        google-default-arguments,
+        google-explicit-constructor,
+        google-runtime-operator,
+
+        hicpp-exception-baseclass,
+        hicpp-multiway-paths-covered,
+
+        misc-*,
+        -misc-non-private-member-variables-in-classes,
+        -misc-unused-*,
+
+        modernize-*,
+        -modernize-avoid-c-arrays,
+        -modernize-use-default-member-init,
+        -modernize-use-trailing-return-type,
+
+        mpi-*,
+
+        openmp-use-default-none,
+
+        performance-*,
+
+        portability-*,
+
+        readability-*,
+        -readability-braces-around-statements,
+        -readability-convert-member-functions-to-static,
+        -readability-function-size,
+        -readability-implicit-bool-conversion,
+        -readability-isolate-declaration,
+        -readability-magic-numbers,
+        -readability-named-parameter,
+        -readability-qualified-auto,
+        -readability-redundant-access-specifiers,
+        -readability-uppercase-literal-suffix,

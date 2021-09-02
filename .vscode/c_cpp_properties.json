@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/",
+                "${workspaceFolder}/cubemx/Core/Inc",
+                "${workspaceFolder}/cubemx/Drivers/STM32L4xx_HAL_Driver/Inc",
+                "${workspaceFolder}/cubemx/Drivers/STM32L4xx_HAL_Driver/Inc/Legacy",
+                "${workspaceFolder}/cubemx/Middlewares/Third_Party/FreeRTOS/Source/include",
+                "${workspaceFolder}/cubemx/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+                "${workspaceFolder}/cubemx/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
+                "${workspaceFolder}/cubemx/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
+                "${workspaceFolder}/cubemx/Drivers/CMSIS/Include",
+                "${workspaceFolder}/src"
+            ],
+            "defines": [
+                "STM32L432xB"
+            ],
+            "compilerPath": "arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
