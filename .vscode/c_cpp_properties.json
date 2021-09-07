@@ -15,7 +15,8 @@
                 "${workspaceFolder}/src"
             ],
             "defines": [
-                "STM32L432xB"
+                "USE_HAL_DRIVER",
+                "STM32L432xx"
             ],
             "compilerPath": "arm-none-eabi-gcc",
             "cStandard": "c11",
