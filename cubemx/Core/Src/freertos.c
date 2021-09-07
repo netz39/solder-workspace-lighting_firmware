@@ -62,6 +62,13 @@ const osThreadAttr_t fading_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal4,
 };
+/* Definitions for encoder */
+osThreadId_t encoderHandle;
+const osThreadAttr_t encoder_attributes = {
+  .name = "encoder",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -70,6 +77,7 @@ const osThreadAttr_t fading_attributes = {
 
 void StartDefaultTask(void *argument);
 extern void fadingTask(void *argument);
+extern void encoderTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -105,6 +113,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of fading */
   fadingHandle = osThreadNew(fadingTask, NULL, &fading_attributes);
+
+  /* creation of encoder */
+  encoderHandle = osThreadNew(encoderTask, NULL, &encoder_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

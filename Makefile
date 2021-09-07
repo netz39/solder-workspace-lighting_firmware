@@ -1,11 +1,12 @@
-TARGET	:= solder_workspace_lighting
+TARGET  := solder_workspace_lighting
 RTOS    := freertos
-DEVICE	:= stm32l432
+DEVICE  := stm32l432
 
-INCDIRS			:=  \
-src 				\
+INCDIRS :=          \
+src                 \
 
-SOURCES			:=  \
+SOURCES :=          \
+src/encoder.cxx     \
 src/leds.cxx        \
 src/main.cxx
 

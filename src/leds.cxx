@@ -2,10 +2,21 @@
 #include "task.h"
 #include "tim.h"
 
+#include "GammaLUT.hpp"
+#include "helpers/freertos.hpp"
 #include "leds.hpp"
+#include "units/si/frequency.hpp"
 
-constexpr auto EncoderTimer = &htim1;
+#include <climits>
+
+uint8_t targetLedPercentage = MaxPercentage;
+
+namespace
+{
 constexpr auto LedTimer = &htim2;
+constexpr auto TaskFrequency = 100.0_Hz;
+uint8_t currentLedPercentage = MinPercentage;
+} // namespace
 
 extern "C" void fadingTask(void *)
 {
@@ -14,74 +25,53 @@ extern "C" void fadingTask(void *)
     HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_3);
     HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_4);
 
-    HAL_TIM_Encoder_Start(EncoderTimer, TIM_CHANNEL_ALL);
+    constexpr auto TimeToFadeAtStart = 300.0_ms;
+    constexpr auto TimeToFade = 100.0_ms;
 
-    constexpr auto Min = 1;
-    constexpr auto Max = 20;
-    // constexpr auto CountingStep = 5;
+    bool isStarting = true;
 
-    constexpr auto TimeToFade = 250;
-    constexpr auto Diff = Max - Min;
-    constexpr auto Delay = TimeToFade / Diff;
-
-    int8_t counter = Max;
-    // bool countingUp = true;
-
-    /*
-    const auto PwmValue = GammaLUT[counter];
-    LedTimer->Instance->CCR1 = PwmValue;
-    LedTimer->Instance->CCR2 = PwmValue;
-    LedTimer->Instance->CCR3 = PwmValue;
-    LedTimer->Instance->CCR4 = PwmValue;
-    */
-
-    // vTaskDelay(pdMS_TO_TICKS(1000));
-    uint16_t oldEncoderValue = 0;
+    auto lastWakeTime = xTaskGetTickCount();
+    bool restart = true;
 
     while (true)
     {
-        vTaskDelay(pdMS_TO_TICKS(50));
-        /*
-        if (countingUp)
+        if (!restart)
+            xTaskNotifyWait(0, ULONG_MAX, nullptr, portMAX_DELAY);
+
+        restart = false;
+
+        const int8_t Difference = currentLedPercentage - targetLedPercentage;
+        const uint8_t NumberOfSteps = gcem::abs(Difference);
+
+        const auto DelayTime = (isStarting ? TimeToFadeAtStart : TimeToFade) / NumberOfSteps;
+
+        uint8_t factor = NumberOfSteps - 1;
+
+        while (true)
         {
-            counter += CountingStep;
-            if (counter == Max)
-                countingUp = false;
-        }
-        else
-        {
-            counter -= CountingStep;
-            if (counter == Min)
-                countingUp = true;
-        }
-        */
-        /*
-        if (counter++ == Max)
-        {
-            while (true)
+            currentLedPercentage = targetLedPercentage + (factor * Difference) / NumberOfSteps;
+
+            const auto PwmValue = GammaLUT[currentLedPercentage];
+            LedTimer->Instance->CCR1 = PwmValue;
+            LedTimer->Instance->CCR2 = PwmValue;
+            LedTimer->Instance->CCR3 = PwmValue;
+            LedTimer->Instance->CCR4 = PwmValue;
+
+            if (factor == 0)
+                break;
+
+            factor--;
+
+            uint32_t notifiedValue;
+            xTaskNotifyWait(0, ULONG_MAX, &notifiedValue, toOsTicks(DelayTime));
+            if ((notifiedValue & 1U) != 0)
             {
-                volatile auto EncoderValue = TIM1->CNT;
-                vTaskDelay(pdMS_TO_TICKS(10));
+                // restart fading
+
+                restart = true;
+                break;
             }
         }
-        */
-        const auto EncoderValue = TIM1->CNT;
-        const int8_t Diff = (EncoderValue - oldEncoderValue) / 4;
-        if (gcem::abs(Diff) >= 10)
-            continue;
-
-        oldEncoderValue = EncoderValue;
-
-        counter += Diff;
-        if (counter < Min)
-            counter = Min;
-        else if (counter > Max)
-            counter = Max;
-
-        const auto PwmValue = GammaLUT[counter * 5];
-        LedTimer->Instance->CCR1 = PwmValue;
-        LedTimer->Instance->CCR2 = PwmValue;
-        LedTimer->Instance->CCR3 = PwmValue;
-        LedTimer->Instance->CCR4 = PwmValue;
+        isStarting = false;
     }
 }
