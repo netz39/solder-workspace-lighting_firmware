@@ -69,6 +69,13 @@ const osThreadAttr_t encoder_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal2,
 };
+/* Definitions for adc */
+osThreadId_t adcHandle;
+const osThreadAttr_t adc_attributes = {
+  .name = "adc",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal4,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -78,6 +85,7 @@ const osThreadAttr_t encoder_attributes = {
 void StartDefaultTask(void *argument);
 extern void fadingTask(void *argument);
 extern void encoderTask(void *argument);
+extern void adcTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -116,6 +124,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of encoder */
   encoderHandle = osThreadNew(encoderTask, NULL, &encoder_attributes);
+
+  /* creation of adc */
+  adcHandle = osThreadNew(adcTask, NULL, &adc_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

@@ -6,6 +6,7 @@ INCDIRS :=          \
 src                 \
 
 SOURCES :=          \
+src/adc.cxx         \
 src/encoder.cxx     \
 src/leds.cxx        \
 src/main.cxx
