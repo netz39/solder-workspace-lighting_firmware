@@ -9,7 +9,7 @@
 
 #include <climits>
 
-uint8_t targetLedPercentage = MaxPercentage;
+uint8_t targetLedPercentage = MaxPercentage * 0.8;
 
 namespace
 {
