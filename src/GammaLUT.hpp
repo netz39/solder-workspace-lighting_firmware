@@ -2,6 +2,7 @@
 
 #include "gcem/include/gcem.hpp"
 #include <array>
+#include <cstdint>
 
 constexpr auto PwmResolutionInBit = 12;
 
