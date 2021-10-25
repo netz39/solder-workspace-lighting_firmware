@@ -17,11 +17,14 @@ using units::si::Scalar;
 using units::si::Temperature;
 using units::si::Voltage;
 
+constexpr auto TemperatureChannelCount = 4;
+std::array<Temperature, TemperatureChannelCount> ledTemperatures{0.0_degC, 0.0_degC, 0.0_degC,
+                                                                 0.0_degC};
+
 extern TaskHandle_t adcHandle;
 
 namespace
 {
-constexpr auto TemperatureChannelCount = 4;
 constexpr auto TotalChannelNumber = TemperatureChannelCount + 1; // vref
 constexpr auto VrefChannel = TotalChannelNumber - 1;
 
@@ -37,8 +40,6 @@ constexpr auto NtcResistanceAtNominalTemperature = 10_kOhm;
 constexpr auto NtcSecondResistor = 10_kOhm;
 
 std::array<uint16_t, TotalChannelNumber> adcResults;
-std::array<Temperature, TemperatureChannelCount> ledTemperatures{0.0_degC, 0.0_degC, 0.0_degC,
-                                                                 0.0_degC};
 
 void calculateReferenceVoltage()
 {
@@ -109,8 +110,6 @@ extern "C" void adcTask(void *)
 
         calculateReferenceVoltage();
         calculateTemperatures();
-
-        volatile auto degree = ledTemperatures[0].getMagnitude(units::si::offset::degC);
 
         vTaskDelayUntil(&lastWakeTime, toOsTicks(AdcTaskFrequency));
     }

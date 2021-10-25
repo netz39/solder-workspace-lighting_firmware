@@ -5,7 +5,9 @@
 
 #include "OledDisplay.hpp"
 #include "SSD1306_SPI.hpp"
+#include "adc.hpp"
 #include "helpers/freertos.hpp"
+#include "leds.hpp"
 #include "oled-driver/Display.hpp"
 #include "oled-driver/Renderer.hpp"
 
@@ -72,21 +74,19 @@ void waitForTXComplete()
 }
 
 //--------------------------------------------------------------------------------------------------
-extern "C" void uiTask(void *)
+void drawDisplay()
 {
-    initDisplay();
-
-    auto lastWakeTime = xTaskGetTickCount();
-
     renderer.clearAll();
 
     constexpr auto Space = 47;
-    constexpr auto Temp = "42°C";
-    const auto TextWidth = renderer.getLineWidth(Temp);
+    const auto TextWidth = renderer.getLineWidth("000°C");
     const auto SeperatorColumn1 = (Space + TextWidth / 2) / 2;
     const auto SeperatorColumn2 = OledWidth - (TextWidth / 2 + Space) / 2;
 
-    renderer.print({OledWidth / 2, 0}, "75%", Renderer::Alignment::Center, 2);
+    constexpr auto MaximumChars = 22;
+    char buffer[MaximumChars];
+    snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
+    renderer.print({OledWidth / 2, 0}, buffer, Renderer::Alignment::Center, 2);
 
     constexpr auto Row = 4;
     renderer.drawHorizontalLine(2, Row);
@@ -94,14 +94,35 @@ extern "C" void uiTask(void *)
     renderer.drawVerticalLine(64, 2, 3, Row);
     renderer.drawVerticalLine(SeperatorColumn2, 2, 3, Row);
 
-    renderer.print({0, 3}, Temp, Renderer::Alignment::Left, 1);
-    renderer.print({Space, 3}, Temp, Renderer::Alignment::Center, 1);
-    renderer.print({OledWidth - Space, 3}, Temp, Renderer::Alignment::Center, 1);
-    renderer.print({OledWidth, 3}, Temp, Renderer::Alignment::Right, 1);
+    snprintf(buffer, MaximumChars, "%d°C",
+             ledTemperatures[0].getMagnitude<int>(units::si::offset::degC));
+    renderer.print({0, 3}, buffer, Renderer::Alignment::Left);
+
+    snprintf(buffer, MaximumChars, "%d°C",
+             ledTemperatures[1].getMagnitude<int>(units::si::offset::degC));
+    renderer.print({Space, 3}, buffer, Renderer::Alignment::Center);
+
+    snprintf(buffer, MaximumChars, "%d°C",
+             ledTemperatures[2].getMagnitude<int>(units::si::offset::degC));
+    renderer.print({OledWidth - Space, 3}, buffer, Renderer::Alignment::Center);
+
+    snprintf(buffer, MaximumChars, "%d°C",
+             ledTemperatures[3].getMagnitude<int>(units::si::offset::degC));
+    renderer.print({OledWidth, 3}, buffer, Renderer::Alignment::Right);
+
+    renderer.render();
+}
+
+//--------------------------------------------------------------------------------------------------
+extern "C" void uiTask(void *)
+{
+    initDisplay();
+
+    auto lastWakeTime = xTaskGetTickCount();
 
     while (true)
     {
-        renderer.render();
+        drawDisplay();
         vTaskDelayUntil(&lastWakeTime, toOsTicks(TaskFrequency));
     }
 }
