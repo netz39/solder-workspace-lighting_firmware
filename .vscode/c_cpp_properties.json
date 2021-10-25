@@ -12,7 +12,9 @@
                 "${workspaceFolder}/cubemx/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
                 "${workspaceFolder}/cubemx/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
                 "${workspaceFolder}/cubemx/Drivers/CMSIS/Include",
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/oled-driver/include",
+                "${workspaceFolder}/src/oled-driver"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
