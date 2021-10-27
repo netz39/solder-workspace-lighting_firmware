@@ -47,8 +47,8 @@ void initDisplay()
     display.setComPinConfig(false, false);
     display.setContrastControl(0xFF);
     display.setDisplayClockDivide(0, 0x8);
-    display.setSegmentRemap(true);
-    display.setComOutputMode(Display::ComMode::Remap);
+    display.setSegmentRemap(false);
+    display.setComOutputMode(Display::ComMode::Normal);
     display.setPrechargingPeriod(1, 0xF);
     display.setChargePump(true);
 
