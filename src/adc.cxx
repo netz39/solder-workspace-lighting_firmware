@@ -71,6 +71,12 @@ void waitUntilConversionFinished()
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
+void updateFastLowpass(units::si::Temperature &oldValue, const units::si::Temperature newSample,
+                       const uint8_t sampleCount)
+{
+    oldValue += (newSample - oldValue) / static_cast<float>(sampleCount);
+}
+
 void calculateTemperatures()
 {
     for (size_t i = 0; i < TemperatureChannelCount; i++)
@@ -82,8 +88,10 @@ void calculateTemperatures()
         const float LogValue =
             gcem::log((NtcResistance / NtcResistanceAtNominalTemperature).getMagnitude<double>());
 
-        ledTemperatures[i] = units::si::Temperature{
+        const auto newValue = units::si::Temperature{
             1 / ((1_ / NtcNominalTemperature).getMagnitude() + (1 / NtcBetaValue) * LogValue)};
+
+        updateFastLowpass(ledTemperatures[i], newValue, 16);
     }
 }
 } // namespace
