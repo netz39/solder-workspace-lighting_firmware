@@ -1,6 +1,7 @@
 TARGET  := solder_workspace_lighting
-RTOS    := freertos
 DEVICE  := stm32l432
+
+DEFS    += FW_USE_RTOS
 
 INCDIRS :=              \
 src/oled-driver/include \

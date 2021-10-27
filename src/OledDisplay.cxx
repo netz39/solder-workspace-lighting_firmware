@@ -46,7 +46,7 @@ void initDisplay()
     display.setMultiplexRatio(OledPages * 8 - 1);
     display.setComPinConfig(false, false);
     display.setContrastControl(0xFF);
-    display.setDisplayClockDivide(0, 0xF);
+    display.setDisplayClockDivide(0, 0x8);
     display.setSegmentRemap(true);
     display.setComOutputMode(Display::ComMode::Remap);
     display.setPrechargingPeriod(1, 0xF);
