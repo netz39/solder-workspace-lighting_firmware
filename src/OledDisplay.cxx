@@ -73,6 +73,16 @@ void waitForTXComplete()
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
+//-----------------------------------------------------------------------------
+void getTemperaturePrint(const units::si::Temperature &temperature, char *buffer, size_t bufferSize)
+{
+    if (temperature.getMagnitude() == 0.0f)
+        snprintf(buffer, bufferSize, "--°C");
+    else
+        snprintf(buffer, bufferSize, "%d°C",
+                 temperature.getMagnitude<int>(units::si::offset::degC));
+}
+
 //--------------------------------------------------------------------------------------------------
 void drawDisplay()
 {
@@ -94,20 +104,16 @@ void drawDisplay()
     renderer.drawVerticalLine(64, 2, 3, Row);
     renderer.drawVerticalLine(SeperatorColumn2, 2, 3, Row);
 
-    snprintf(buffer, MaximumChars, "%d°C",
-             ledTemperatures[0].getMagnitude<int>(units::si::offset::degC));
+    getTemperaturePrint(ledTemperatures[0], buffer, MaximumChars);
     renderer.print({0, 3}, buffer, Renderer::Alignment::Left);
 
-    snprintf(buffer, MaximumChars, "%d°C",
-             ledTemperatures[1].getMagnitude<int>(units::si::offset::degC));
+    getTemperaturePrint(ledTemperatures[1], buffer, MaximumChars);
     renderer.print({Space, 3}, buffer, Renderer::Alignment::Center);
 
-    snprintf(buffer, MaximumChars, "%d°C",
-             ledTemperatures[2].getMagnitude<int>(units::si::offset::degC));
+    getTemperaturePrint(ledTemperatures[2], buffer, MaximumChars);
     renderer.print({OledWidth - Space, 3}, buffer, Renderer::Alignment::Center);
 
-    snprintf(buffer, MaximumChars, "%d°C",
-             ledTemperatures[3].getMagnitude<int>(units::si::offset::degC));
+    getTemperaturePrint(ledTemperatures[3], buffer, MaximumChars);
     renderer.print({OledWidth, 3}, buffer, Renderer::Alignment::Right);
 
     renderer.render();

@@ -81,6 +81,12 @@ void calculateTemperatures()
 {
     for (size_t i = 0; i < TemperatureChannelCount; i++)
     {
+        if (adcResults[i] == 0)
+        {
+            ledTemperatures[i] = units::si::Temperature(0);
+            continue;
+        }
+
         auto DropVoltage = physicalQuantityFromAdcResult(adcResults[i], 1);
         auto NtcResistance =
             (referenceVoltage * NtcSecondResistor - DropVoltage * NtcSecondResistor) / DropVoltage;
