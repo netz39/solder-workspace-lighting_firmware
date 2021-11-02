@@ -1,12 +1,14 @@
 #include "FreeRTOS.h"
 #include "main.h"
 #include "task.h"
+#include "timers.h"
 
 #include "Button.hpp"
 #include "Gpio.hpp"
 #include "helpers/freertos.hpp"
 #include "leds.hpp"
 
+extern TimerHandle_t ledIdleTimer;
 extern FadingState fadingState;
 extern TaskHandle_t fadingHandle;
 extern void resetLedIdleTimeout();
@@ -26,6 +28,13 @@ void encoderButtonCallback(Button::Action action)
     {
         resetLedIdleTimeout();
         targetLedPercentage = DefaultPercentage;
+        xTaskNotify(fadingHandle, 1U, eSetBits);
+    }
+
+    else if (action == Button::Action::LongPress)
+    {
+        xTimerStop(ledIdleTimer, 0);
+        targetLedPercentage = MinPercentage;
         xTaskNotify(fadingHandle, 1U, eSetBits);
     }
 }
