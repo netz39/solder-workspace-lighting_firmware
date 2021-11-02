@@ -8,6 +8,7 @@
 #include "units/si/frequency.hpp"
 
 extern TaskHandle_t fadingHandle;
+extern bool isOverTemperature;
 
 constexpr auto EncoderTimer = &htim1;
 constexpr auto TaskFrequency = 50.0_Hz;
@@ -23,12 +24,14 @@ extern "C" void encoderTask(void *)
     {
         vTaskDelayUntil(&lastWakeTime, toOsTicks(TaskFrequency));
 
-        const uint16_t EncoderValue = TIM1->CNT;
+        // get new encoder value and calc difference
+        const uint16_t EncoderValue = __HAL_TIM_GET_COUNTER(EncoderTimer);
         int8_t diff = (EncoderValue - oldEncoderValue);
 
         if (diff == 0 || gcem::abs(diff) < 4)
             continue;
 
+        // STM encoder timer returns values by factor 4 however
         diff = (diff / 4) * 5;
         oldEncoderValue = EncoderValue;
 
@@ -38,9 +41,18 @@ extern "C" void encoderTask(void *)
         if (temp < MinPercentage)
             temp = MinPercentage;
 
-        else if (temp > MaxPercentage)
-            temp = MaxPercentage;
+        else if (!isOverTemperature)
+        {
+            if (temp > MaxPercentage)
+                temp = MaxPercentage;
+        }
+        else
+        {
+            // in case of over temperature default is our new maximum
+            temp = DefaultPercentage;
+        }
 
+        // set target LED percentage and start fading
         targetLedPercentage = temp;
         xTaskNotify(fadingHandle, 1U, eSetBits);
     }

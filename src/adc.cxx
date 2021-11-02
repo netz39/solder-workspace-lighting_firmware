@@ -4,6 +4,7 @@
 
 #include "gcem/include/gcem.hpp"
 #include "helpers/freertos.hpp"
+#include "leds.hpp"
 #include "units/si/frequency.hpp"
 #include "units/si/resistance.hpp"
 #include "units/si/scalar.hpp"
@@ -20,6 +21,8 @@ using units::si::Voltage;
 constexpr auto TemperatureChannelCount = 4;
 std::array<Temperature, TemperatureChannelCount> ledTemperatures{0.0_degC, 0.0_degC, 0.0_degC,
                                                                  0.0_degC};
+
+bool isOverTemperature = false;
 
 extern TaskHandle_t adcHandle;
 
@@ -38,6 +41,9 @@ constexpr auto NtcBetaValue = 3380.0f;
 constexpr auto NtcNominalTemperature = 25.0_degC;
 constexpr auto NtcResistanceAtNominalTemperature = 10_kOhm;
 constexpr auto NtcSecondResistor = 10_kOhm;
+
+constexpr auto MaximumTemperatureLowerThreshold = 60.0_degC;
+constexpr auto MaximumTemperatureUpperThreshold = 80.0_degC;
 
 std::array<uint16_t, TotalChannelNumber> adcResults;
 
@@ -71,8 +77,8 @@ void waitUntilConversionFinished()
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
-void updateFastLowpass(units::si::Temperature &oldValue, const units::si::Temperature newSample,
-                       const uint8_t sampleCount)
+template <class T>
+void updateFastLowpass(T &oldValue, const T newSample, const uint8_t sampleCount)
 {
     oldValue += (newSample - oldValue) / static_cast<float>(sampleCount);
 }
@@ -100,6 +106,27 @@ void calculateTemperatures()
         updateFastLowpass(ledTemperatures[i], newValue, 16);
     }
 }
+
+void checkOverTemperature()
+{
+    Temperature maximumTemperature =
+        *std::max_element(ledTemperatures.begin(), ledTemperatures.end());
+
+    if (!isOverTemperature)
+    {
+        if (maximumTemperature >= MaximumTemperatureUpperThreshold)
+        {
+            isOverTemperature = true;
+            if (targetLedPercentage > DefaultPercentage)
+                targetLedPercentage = DefaultPercentage;
+        }
+    }
+    else if (maximumTemperature <= MaximumTemperatureUpperThreshold)
+    {
+        isOverTemperature = false;
+    }
+}
+
 } // namespace
 
 extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *)
@@ -124,6 +151,8 @@ extern "C" void adcTask(void *)
 
         calculateReferenceVoltage();
         calculateTemperatures();
+
+        checkOverTemperature();
 
         vTaskDelayUntil(&lastWakeTime, toOsTicks(AdcTaskFrequency));
     }
