@@ -3,6 +3,13 @@
 
 extern uint8_t targetLedPercentage;
 
+enum class FadingState
+{
+    Starting,
+    Normal,
+    Standby
+};
+
 constexpr auto NumberOfLeds = 4;
 constexpr auto MinPercentage = 0;
 constexpr auto MaxPercentage = 100;

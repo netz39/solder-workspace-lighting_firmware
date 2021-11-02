@@ -9,6 +9,8 @@ src/oled-driver/        \
 src
 
 SOURCES :=                          \
+src/Button/Button.cxx               \
+src/Button/buttonHandler.cxx        \
 src/adc.cxx         				\
 src/oled-driver/fonts/mono.cxx      \
 src/oled-driver/src/Display.cxx     \

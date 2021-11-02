@@ -108,9 +108,11 @@ void drawDisplay()
             ticksToTime(xTimerGetExpiryTime(ledIdleTimer) - xTaskGetTickCount());
 
         if (CountdownRemainingTime <= TimeThresholdToShowCountdown)
-            snprintf(
-                buffer, MaximumChars, "%d%% - %dmin", targetLedPercentage,
-                gcem::ceil(CountdownRemainingTime.getMagnitude<uint8_t>(units::si::scale::min)));
+        {
+            const uint8_t RemainingMinutes =
+                gcem::ceil(CountdownRemainingTime.getMagnitude(units::si::scale::min));
+            snprintf(buffer, MaximumChars, "%d%% - %dmin", targetLedPercentage, RemainingMinutes);
+        }
         else
             snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
     }

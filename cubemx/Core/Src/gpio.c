@@ -66,6 +66,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = EncoderButton_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(EncoderButton_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PBPin PBPin PBPin */
   GPIO_InitStruct.Pin = DisplayCS_Pin|DisplayDC_Pin|DisplayReset_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;

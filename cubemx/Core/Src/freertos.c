@@ -83,6 +83,13 @@ const osThreadAttr_t ui_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityBelowNormal4,
 };
+/* Definitions for button */
+osThreadId_t buttonHandle;
+const osThreadAttr_t button_attributes = {
+  .name = "button",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal6,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -94,6 +101,7 @@ extern void fadingTask(void *argument);
 extern void encoderTask(void *argument);
 extern void adcTask(void *argument);
 extern void uiTask(void *argument);
+extern void buttonUpdateTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -167,6 +175,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of ui */
   uiHandle = osThreadNew(uiTask, NULL, &ui_attributes);
+
+  /* creation of button */
+  buttonHandle = osThreadNew(buttonUpdateTask, NULL, &button_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

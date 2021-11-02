@@ -58,6 +58,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define EncoderButton_Pin GPIO_PIN_7
+#define EncoderButton_GPIO_Port GPIOA
 #define DisplayCS_Pin GPIO_PIN_4
 #define DisplayCS_GPIO_Port GPIOB
 #define DisplayDC_Pin GPIO_PIN_6

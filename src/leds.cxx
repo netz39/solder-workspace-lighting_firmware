@@ -13,13 +13,6 @@
 extern TaskHandle_t fadingHandle;
 uint8_t targetLedPercentage = DefaultPercentage;
 
-enum class FadingState
-{
-    Starting,
-    Normal,
-    Standby
-};
-
 FadingState fadingState = FadingState::Starting;
 
 namespace
@@ -33,8 +26,8 @@ constexpr auto TimeToFadeOff = 5.0_s;
 constexpr auto LedIdleTimout = 45.0_min;
 
 uint8_t currentLedPercentage = MinPercentage;
+} // namespace
 
-//--------------------------------------------------------------------------------------------------
 void onLedIdleTimeout(TimerHandle_t)
 {
     fadingState = FadingState::Standby;
@@ -45,11 +38,9 @@ void onLedIdleTimeout(TimerHandle_t)
 TimerHandle_t ledIdleTimer =
     xTimerCreate("ledIdleTimeout", toOsTicks(LedIdleTimout), pdFALSE, nullptr, onLedIdleTimeout);
 
-} // namespace
-
 void resetLedIdleTimeout()
 {
-    xTimerGetExpiryTime xTimerReset(ledIdleTimer, 0);
+    xTimerReset(ledIdleTimer, 0);
     fadingState = FadingState::Normal;
 }
 
