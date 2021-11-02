@@ -100,8 +100,11 @@ void drawDisplay()
     const auto SeperatorColumn1 = (Space + TextWidth / 2) / 2;
     const auto SeperatorColumn2 = OledWidth - (TextWidth / 2 + Space) / 2;
 
-    if (!xTimerIsTimerActive(ledIdleTimer))
+    if (!xTimerIsTimerActive(ledIdleTimer) || targetLedPercentage == 0)
+    {
+        xTimerStop(ledIdleTimer, 0);
         snprintf(buffer, MaximumChars, "STANDBY");
+    }
     else
     {
         const auto CountdownRemainingTime =
