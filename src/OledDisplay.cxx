@@ -2,10 +2,12 @@
 #include "queue.h"
 #include "spi.h"
 #include "task.h"
+#include "timers.h"
 
 #include "OledDisplay.hpp"
 #include "SSD1306_SPI.hpp"
 #include "adc.hpp"
+#include "gcem/include/gcem.hpp"
 #include "helpers/freertos.hpp"
 #include "leds.hpp"
 #include "oled-driver/Display.hpp"
@@ -16,12 +18,17 @@ static Display display(ssdi);
 Renderer renderer(OledWidth, OledPages, display);
 
 extern TaskHandle_t uiHandle;
+extern TimerHandle_t ledIdleTimer;
 
 extern "C" void spi1TXCompleteCallback(SPI_HandleTypeDef *);
 
 namespace
 {
 constexpr auto TaskFrequency = 100.0_Hz;
+constexpr auto TimeThresholdToShowCountdown = 5.0_min;
+
+constexpr auto MaximumChars = 22;
+char buffer[MaximumChars];
 
 //--------------------------------------------------------------------------------------------------
 void notifyRenderTask()
@@ -89,19 +96,30 @@ void drawDisplay()
     renderer.clearAll();
 
     constexpr auto Space = 47;
-    const auto TextWidth = renderer.getLineWidth("000°C");
+    const auto TextWidth = renderer.getLineWidth("---°C");
     const auto SeperatorColumn1 = (Space + TextWidth / 2) / 2;
     const auto SeperatorColumn2 = OledWidth - (TextWidth / 2 + Space) / 2;
 
-    constexpr auto MaximumChars = 22;
-    char buffer[MaximumChars];
-    snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
+    if (!xTimerIsTimerActive(ledIdleTimer))
+        snprintf(buffer, MaximumChars, "STANDBY");
+    else
+    {
+        const auto CountdownRemainingTime =
+            ticksToTime(xTimerGetExpiryTime(ledIdleTimer) - xTaskGetTickCount());
+
+        if (CountdownRemainingTime <= TimeThresholdToShowCountdown)
+            snprintf(
+                buffer, MaximumChars, "%d%% - %dmin", targetLedPercentage,
+                gcem::ceil(CountdownRemainingTime.getMagnitude<uint8_t>(units::si::scale::min)));
+        else
+            snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
+    }
     renderer.print({OledWidth / 2, 0}, buffer, Renderer::Alignment::Center, 2);
 
     constexpr auto Row = 4;
     renderer.drawHorizontalLine(2, Row);
     renderer.drawVerticalLine(SeperatorColumn1, 2, 3, Row);
-    renderer.drawVerticalLine(64, 2, 3, Row);
+    renderer.drawVerticalLine(OledWidth / 2, 2, 3, Row);
     renderer.drawVerticalLine(SeperatorColumn2, 2, 3, Row);
 
     getTemperaturePrint(ledTemperatures[0], buffer, MaximumChars);

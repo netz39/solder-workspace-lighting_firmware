@@ -9,6 +9,7 @@
 
 extern TaskHandle_t fadingHandle;
 extern bool isOverTemperature;
+extern void resetLedIdleTimeout();
 
 constexpr auto EncoderTimer = &htim1;
 constexpr auto TaskFrequency = 50.0_Hz;
@@ -30,6 +31,8 @@ extern "C" void encoderTask(void *)
 
         if (diff == 0 || gcem::abs(diff) < 4)
             continue;
+
+        resetLedIdleTimeout();
 
         // STM encoder timer returns values by factor 4 however
         diff = (diff / 4) * 5;
