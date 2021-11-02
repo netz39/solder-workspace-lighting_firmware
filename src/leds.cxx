@@ -51,6 +51,8 @@ extern "C" void fadingTask(void *)
     HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_3);
     HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_4);
 
+    resetLedIdleTimeout();
+
     auto lastWakeTime = xTaskGetTickCount();
     bool restart = true;
 
