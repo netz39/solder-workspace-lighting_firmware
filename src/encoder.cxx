@@ -52,7 +52,8 @@ extern "C" void encoderTask(void *)
         else
         {
             // in case of over temperature default is our new maximum
-            temp = DefaultPercentage;
+            if (temp > DefaultPercentage) 
+                temp = DefaultPercentage;
         }
 
         // set target LED percentage and start fading
