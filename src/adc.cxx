@@ -25,6 +25,7 @@ std::array<Temperature, TemperatureChannelCount> ledTemperatures{0.0_degC, 0.0_d
 bool isOverTemperature = false;
 
 extern TaskHandle_t adcHandle;
+extern TaskHandle_t fadingHandle;
 
 namespace
 {
@@ -42,7 +43,7 @@ constexpr auto NtcNominalTemperature = 25.0_degC;
 constexpr auto NtcResistanceAtNominalTemperature = 10_kOhm;
 constexpr auto NtcSecondResistor = 10_kOhm;
 
-constexpr auto MaximumTemperatureLowerThreshold = 60.0_degC;
+constexpr auto MaximumTemperatureLowerThreshold = 70.0_degC;
 constexpr auto MaximumTemperatureUpperThreshold = 80.0_degC;
 
 std::array<uint16_t, TotalChannelNumber> adcResults;
@@ -118,10 +119,13 @@ void checkOverTemperature()
         {
             isOverTemperature = true;
             if (targetLedPercentage > DefaultPercentage)
+            {
                 targetLedPercentage = DefaultPercentage;
+                xTaskNotify(fadingHandle, 1U, eSetBits);
+            } 
         }
     }
-    else if (maximumTemperature <= MaximumTemperatureUpperThreshold)
+    else if (maximumTemperature <= MaximumTemperatureLowerThreshold)
     {
         isOverTemperature = false;
     }
