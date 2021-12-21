@@ -25,7 +25,7 @@ extern "C" void spi1TXCompleteCallback(SPI_HandleTypeDef *);
 namespace
 {
 constexpr auto TaskFrequency = 100.0_Hz;
-constexpr auto TimeThresholdToShowCountdown = 5.0_min;
+constexpr auto TimeThresholdToShowCountdown = 9.0_min;
 
 constexpr auto MaximumChars = 22;
 char buffer[MaximumChars];
@@ -96,9 +96,12 @@ void drawDisplay()
     renderer.clearAll();
 
     constexpr auto Space = 47;
-    const auto TextWidth = renderer.getLineWidth("---°C");
-    const auto SeperatorColumn1 = (Space + TextWidth / 2) / 2;
-    const auto SeperatorColumn2 = OledWidth - (TextWidth / 2 + Space) / 2;
+    const auto TemperatureTextWidth = renderer.getLineWidth("---°C");
+    const auto MinutesTextWidth = renderer.getLineWidth("--min");
+
+    const auto SeperatorColumn1 = (Space + TemperatureTextWidth / 2) / 2;
+    const auto SeperatorColumn2 = OledWidth - (TemperatureTextWidth / 2 + Space) / 2;
+    const auto SeperatorColumn3 = OledWidth - (MinutesTextWidth + 4);
 
     if (!xTimerIsTimerActive(ledIdleTimer) || targetLedPercentage == 0)
     {
@@ -109,15 +112,22 @@ void drawDisplay()
     {
         const auto CountdownRemainingTime =
             ticksToTime(xTimerGetExpiryTime(ledIdleTimer) - xTaskGetTickCount());
+        const uint8_t RemainingMinutes =
+            gcem::ceil(CountdownRemainingTime.getMagnitude(units::si::scale::min));
 
         if (CountdownRemainingTime <= TimeThresholdToShowCountdown)
         {
-            const uint8_t RemainingMinutes =
-                gcem::ceil(CountdownRemainingTime.getMagnitude(units::si::scale::min));
             snprintf(buffer, MaximumChars, "%d%% - %dmin", targetLedPercentage, RemainingMinutes);
         }
         else
+        {
+            snprintf(buffer, MaximumChars, "%dmin", RemainingMinutes);
+            renderer.print({OledWidth, 0}, buffer, Renderer::Alignment::Right);
+            renderer.drawVerticalLine(SeperatorColumn3, 0, 1, 0, 4);
+            renderer.drawHorizontalLine(1, 4, SeperatorColumn3, OledWidth - 1);
+
             snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
+        }
     }
     renderer.print({OledWidth / 2, 0}, buffer, Renderer::Alignment::Center, 2);
 
