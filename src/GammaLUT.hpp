@@ -4,7 +4,7 @@
 #include <array>
 #include <cstdint>
 
-constexpr auto PwmResolutionInBit = 12;
+constexpr auto PwmResolutionInBit = 11;
 
 constexpr auto StartOffset = 110;
 constexpr auto GammaFactor = 2.2;
