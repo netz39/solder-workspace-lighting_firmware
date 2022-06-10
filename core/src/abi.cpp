@@ -1,20 +1,23 @@
+#include "core/BuildConfiguration.hpp"
 #include <cstddef>
 
-#if FW_USE_RTOS
+/**
+ * @brief Links together C++ and FreeRTOS heap handler. Also sets up C++'s guts for embedded
+ * environment. WARNING Can compile on amd64 without the "#if" guard but will cause
+ * SEGFAULT when a class is used. So keep them!
+ *
+ */
+
+#if IS_EMBEDDED_BUILD()
 extern "C"
 {
 #include <FreeRTOS.h>
 #include <task.h>
 }
-#endif
 
 void *operator new(std::size_t size)
 {
-#if FW_USE_RTOS
     return pvPortMalloc(size);
-#else
-    return reinterpret_cast<void *>(0xffffffff);
-#endif
 }
 
 void *operator new[](std::size_t size)
@@ -24,13 +27,7 @@ void *operator new[](std::size_t size)
 
 void operator delete(void *ptr)
 {
-#if FW_USE_RTOS
     vPortFree(ptr);
-#else
-    while (1)
-    {
-    }
-#endif
 }
 
 void operator delete(void *ptr, unsigned int)
@@ -110,7 +107,8 @@ extern "C"
 
     // some functions in cmath follow the compiler flag -fno-math-errno
     // but not so for std::pow...
-    void __errno() {
-        
+    void __errno()
+    {
     }
 }
+#endif
