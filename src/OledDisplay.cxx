@@ -123,8 +123,9 @@ void drawDisplay()
         {
             snprintf(buffer, MaximumChars, "%dmin", RemainingMinutes);
             renderer.print({OledWidth, 0}, buffer, Renderer::Alignment::Right);
-            renderer.drawVerticalLine(SeperatorColumn3, 0, 1, 0, 4);
-            renderer.drawHorizontalLine(1, 4, SeperatorColumn3, OledWidth - 1);
+
+            renderer.drawVerticalLine(SeperatorColumn3, 0, 0);
+            renderer.drawHorizontalLine(1, 0, SeperatorColumn3, OledWidth - 1);
 
             snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
         }

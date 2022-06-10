@@ -5,7 +5,6 @@ extern uint8_t targetLedPercentage;
 
 enum class FadingState
 {
-    Starting,
     Normal,
     Standby
 };

@@ -12,6 +12,7 @@ extern TimerHandle_t ledIdleTimer;
 extern FadingState fadingState;
 extern TaskHandle_t fadingHandle;
 extern void resetLedIdleTimeout();
+extern FadingState fadingState;
 
 using units::si::Time;
 using util::Button;
@@ -28,6 +29,7 @@ void encoderButtonCallback(Button::Action action)
     {
         resetLedIdleTimeout();
         targetLedPercentage = DefaultPercentage;
+        fadingState = FadingState::Normal;
         xTaskNotify(fadingHandle, 1U, eSetBits);
     }
 
@@ -35,6 +37,7 @@ void encoderButtonCallback(Button::Action action)
     {
         xTimerStop(ledIdleTimer, 0);
         targetLedPercentage = MinPercentage;
+        fadingState = FadingState::Normal;
         xTaskNotify(fadingHandle, 1U, eSetBits);
     }
 }

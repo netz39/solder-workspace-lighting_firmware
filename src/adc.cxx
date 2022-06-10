@@ -26,6 +26,7 @@ bool isOverTemperature = false;
 
 extern TaskHandle_t adcHandle;
 extern TaskHandle_t fadingHandle;
+extern FadingState fadingState;
 
 namespace
 {
@@ -121,8 +122,9 @@ void checkOverTemperature()
             if (targetLedPercentage > DefaultPercentage)
             {
                 targetLedPercentage = DefaultPercentage;
+                fadingState = FadingState::Normal;
                 xTaskNotify(fadingHandle, 1U, eSetBits);
-            } 
+            }
         }
     }
     else if (maximumTemperature <= MaximumTemperatureLowerThreshold)

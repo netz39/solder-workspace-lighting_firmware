@@ -8,6 +8,7 @@
 #include "units/si/frequency.hpp"
 
 extern TaskHandle_t fadingHandle;
+extern FadingState fadingState;
 extern bool isOverTemperature;
 extern void resetLedIdleTimeout();
 
@@ -52,12 +53,13 @@ extern "C" void encoderTask(void *)
         else
         {
             // in case of over temperature default is our new maximum
-            if (temp > DefaultPercentage) 
+            if (temp > DefaultPercentage)
                 temp = DefaultPercentage;
         }
 
         // set target LED percentage and start fading
         targetLedPercentage = temp;
+        fadingState = FadingState::Normal;
         xTaskNotify(fadingHandle, 1U, eSetBits);
     }
 }

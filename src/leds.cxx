@@ -13,14 +13,13 @@
 extern TaskHandle_t fadingHandle;
 uint8_t targetLedPercentage = DefaultPercentage;
 
-FadingState fadingState = FadingState::Starting;
+FadingState fadingState = FadingState::Normal;
 
 namespace
 {
 constexpr auto LedTimer = &htim2;
 constexpr auto TaskFrequency = 100.0_Hz;
 
-constexpr auto TimeToFadeAtStart = 300.0_ms;
 constexpr auto TimeToFade = 100.0_ms;
 constexpr auto TimeToFadeOff = 5.0_s;
 constexpr auto LedIdleTimout = 45.0_min;
@@ -41,7 +40,6 @@ TimerHandle_t ledIdleTimer =
 void resetLedIdleTimeout()
 {
     xTimerReset(ledIdleTimer, 0);
-    fadingState = FadingState::Normal;
 }
 
 extern "C" void fadingTask(void *)
@@ -69,10 +67,6 @@ extern "C" void fadingTask(void *)
         units::si::Time delayTime = 0.0_s;
         switch (fadingState)
         {
-        case FadingState::Starting:
-            delayTime = TimeToFadeAtStart;
-            break;
-
         case FadingState::Normal:
             delayTime = TimeToFade;
             break;
@@ -110,6 +104,5 @@ extern "C" void fadingTask(void *)
                 break;
             }
         }
-        fadingState = FadingState::Normal;
     }
 }
