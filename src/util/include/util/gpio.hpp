@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gpio.h"
+#include "hal_header.h"
 #include <cstdint>
 
 namespace util
@@ -30,6 +30,15 @@ public:
     void toggle()
     {
         HAL_GPIO_TogglePin(port, pin);
+    }
+
+    [[nodiscard]] GPIO_TypeDef * getPort() const
+    {
+        return port;
+    }
+    [[nodiscard]] uint16_t getPin() const
+    {
+        return pin;
     }
 
 private:

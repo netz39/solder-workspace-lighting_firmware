@@ -3,10 +3,10 @@
 #include "task.h"
 #include "timers.h"
 
-#include "Button.hpp"
-#include "Gpio.hpp"
 #include "helpers/freertos.hpp"
 #include "leds.hpp"
+#include "util/Button.hpp"
+#include "util/gpio.hpp"
 
 extern TimerHandle_t ledIdleTimer;
 extern FadingState fadingState;
@@ -42,8 +42,8 @@ void encoderButtonCallback(Button::Action action)
     }
 }
 
-Button encoderButton({EncoderButton_GPIO_Port, EncoderButton_Pin}, encoderButtonCallback,
-                     LongPressTime);
+Button encoderButton({EncoderButton_GPIO_Port, EncoderButton_Pin}, LongPressTime, false,
+                     encoderButtonCallback);
 
 } // namespace
 

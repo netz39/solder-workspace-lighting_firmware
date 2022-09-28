@@ -20,5 +20,5 @@ constexpr units::si::Energy operator""_Ws(const long double magnitude)
 
 constexpr units::si::Energy operator""_Wh(const long double magnitude)
 {
-    return units::si::Energy(3600.0f * magnitude);
+    return units::si::Energy(static_cast<float>(SecondsPerHour) * magnitude);
 }

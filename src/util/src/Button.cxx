@@ -1,10 +1,17 @@
-#include "Button.hpp"
+#include <util/Button.hpp>
 
 namespace util
 {
+bool Button::isPressing() const
+{
+    return (internalState == InternalState::LongPress ||
+            internalState == InternalState::SuperLongPress);
+}
+
 void Button::update(const units::si::Time timePassed)
 {
-    State state = buttonGpio.read() ? State::NotPressed : State::Pressed;
+    // logical XORing pin state with inverted state
+    State state = (buttonGpio.read() != isInverted) ? State::NotPressed : State::Pressed;
 
     switch (internalState)
     {
@@ -22,24 +29,37 @@ void Button::update(const units::si::Time timePassed)
         if (state == State::NotPressed)
         {
             if (getPassedTime() >= DebounceTime)
-                ButtonCallback(Action::ShortPress);
+                buttonCallback(Action::ShortPress);
 
             internalState = InternalState::Idle;
         }
         else if (getPassedTime() >= LongPressTime)
         {
-            ButtonCallback(Action::LongPress);
+            buttonCallback(Action::LongPress);
             internalState = InternalState::LongPress;
         }
         break;
 
     case InternalState::LongPress:
+        updateTimer(timePassed);
         if (state == State::NotPressed)
         {
-            ButtonCallback(Action::StopLongPress);
+            buttonCallback(Action::StopLongPress);
             internalState = InternalState::Idle;
         }
+        else if (getPassedTime() >= SuperLongPressTime)
+        {
+            buttonCallback(Action::SuperLongPress);
+            internalState = InternalState::SuperLongPress;
+        }
+        break;
 
+    case InternalState::SuperLongPress:
+        if (state == State::NotPressed)
+        {
+            buttonCallback(Action::StopLongPress);
+            internalState = InternalState::Idle;
+        }
         break;
     }
 }
@@ -58,4 +78,11 @@ units::si::Time Button::getPassedTime() const
 {
     return pressTimer;
 }
+
+void Button::buttonCallback(Action action)
+{
+    if (callback)
+        callback(action);
+}
+
 } // namespace util

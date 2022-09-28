@@ -3,6 +3,7 @@
 #include "units/offset.hpp"
 #include "units/scale.hpp"
 #include "units/si_unit.hpp"
+#include <cmath>
 #include <cstdint>
 #include <type_traits>
 
@@ -17,8 +18,28 @@ private:
 public:
     using Unit = SiUnit;
 
+    constexpr explicit Value() noexcept : magnitude{0.0}
+    {
+    }
+
     constexpr explicit Value(const float magnitude) noexcept : magnitude{magnitude}
     {
+    }
+
+    template <typename OffsetSiUnit>
+    constexpr explicit Value(const float magnitude, const Offset<OffsetSiUnit> offset) noexcept :
+          magnitude{magnitude - offset.getOffset()}
+    {
+        static_assert(std::is_same<SiUnit, OffsetSiUnit>::value,
+                      "Offset has incompatible underlying SI unit");
+    }
+
+    template <typename ScaleSiUnit>
+    constexpr explicit Value(const float magnitude, const Scale<ScaleSiUnit> scale) noexcept :
+          magnitude{magnitude / scale.getScalingFactor()}
+    {
+        static_assert(std::is_same<SiUnit, ScaleSiUnit>::value,
+                      "Scale has incompatible underlying SI unit");
     }
 
     template <typename Type = float>
@@ -54,13 +75,46 @@ public:
             return static_cast<Type>(magnitude + offset.getOffset());
     }
 
+    template <typename Type = float, typename OffsetSiUnit>
+    constexpr void setMagnitude(Type newMagnitude, const Offset<OffsetSiUnit> offset) noexcept
+    {
+        static_assert(std::is_same<SiUnit, OffsetSiUnit>::value,
+                       "Offset has incompatible underlying SI unit");
+
+        if constexpr (std::is_same<Type, float>::value)
+            magnitude = newMagnitude - offset.getOffset();
+        else
+            magnitude = static_cast<Type>(newMagnitude - offset.getOffset());
+    }
+
+    template <typename Type = float, typename ScaleSiUnit>
+    constexpr void setMagnitude(Type newMagnitude, const Scale<ScaleSiUnit> scale) noexcept
+    {
+        static_assert(std::is_same<SiUnit, ScaleSiUnit>::value,
+                      "Scale has incompatible underlying SI unit");
+
+        if constexpr (std::is_same<Type, float>::value)
+            magnitude = newMagnitude / scale.getScalingFactor();
+        else
+            magnitude = static_cast<Type>(newMagnitude * scale.getScalingFactor());
+    }
+
     template <typename Type = float>
-    constexpr void setMagnitude(Type magnitude) noexcept
+    constexpr void setMagnitude(Type newMagnitude) noexcept
     {
         if constexpr (std::is_same<Type, float>::value)
-            this->magnitude = magnitude;
+            magnitude = newMagnitude;
         else
-            this->magnitude = static_cast<Type>(magnitude);
+            magnitude = static_cast<Type>(newMagnitude);
+    }
+
+    template <typename Type = float>
+    constexpr Type abs() const noexcept
+    {
+        if constexpr (std::is_same<Type, float>::value)
+            return std::abs(magnitude);
+        else
+            return static_cast<Type>(std::abs(magnitude));
     }
 };
 
@@ -208,4 +262,26 @@ constexpr bool operator!=(const Value<SiUnit<M, Kg, S, A, K, Mo, C>> &lhs,
 {
     return lhs.getMagnitude() != rhs.getMagnitude();
 }
+
+// convenience operators
+template <int M, int Kg, int S, int A, int K, int Mo, int C>
+constexpr Value<SiUnit<M, Kg, S, A, K, Mo, C>> min(const Value<SiUnit<M, Kg, S, A, K, Mo, C>> &lhs,
+                                                   const Value<SiUnit<M, Kg, S, A, K, Mo, C>> &rhs)
+{
+    return Value<SiUnit<M, Kg, S, A, K, Mo, C>>(std::min(lhs.getMagnitude(), rhs.getMagnitude()));
+}
+
+template <int M, int Kg, int S, int A, int K, int Mo, int C>
+constexpr Value<SiUnit<M, Kg, S, A, K, Mo, C>> max(const Value<SiUnit<M, Kg, S, A, K, Mo, C>> &lhs,
+                                                   const Value<SiUnit<M, Kg, S, A, K, Mo, C>> &rhs)
+{
+    return Value<SiUnit<M, Kg, S, A, K, Mo, C>>(std::max(lhs.getMagnitude(), rhs.getMagnitude()));
+}
+
+template <int M, int Kg, int S, int A, int K, int Mo, int C>
+constexpr Value<SiUnit<M, Kg, S, A, K, Mo, C>> abs(const Value<SiUnit<M, Kg, S, A, K, Mo, C>> &lhs)
+{
+    return Value<SiUnit<M, Kg, S, A, K, Mo, C>>(std::abs(lhs.getMagnitude()));
+}
+
 } // namespace units

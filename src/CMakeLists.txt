@@ -22,7 +22,7 @@ set(core_BUILDCONFIGURATION "embedded")
 
 # Adds the core library
 add_subdirectory(core)
-
+add_subdirectory(src/util)
 add_subdirectory(src/oled-driver)
 
 
@@ -31,7 +31,6 @@ set(INCLUDE_FILES
         )
 
 set(Sources
-        src/Button/Button.cxx
         src/Button/buttonHandler.cxx
         #src/Application.cxx
         src/adc.cxx
@@ -54,6 +53,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         core
         freertos
         oled-driver
+        util
         )
 
 # Sets up generation of .list and .bin files after your firmware has generated.
