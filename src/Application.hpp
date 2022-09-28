@@ -4,11 +4,11 @@
 #include "spi.h"
 #include "tim.h"
 
-#include "Button/buttonHandler.hpp"
-#include "OledDisplay.hpp"
-#include "adc.hpp"
-#include "encoder.hpp"
-#include "leds.hpp"
+#include "analog_to_digital/AnalogToDigital.hpp"
+#include "encoder/Encoder.hpp"
+#include "encoder/EncoderButtonHandler.hpp"
+#include "led_control/LedFading.hpp"
+#include "oled_display/OledDisplay.hpp"
 
 class Application
 {
@@ -33,7 +33,7 @@ private:
     bool isOverTemperature = false;
     AnalogToDigital analogToDigital{AdcPeripherie, ledTemperatures, isOverTemperature, ledFading};
 
-    ButtonHandler encoderButton{ledFading};
+    EncoderButtonHandler encoderButtonHandler{ledFading};
     Encoder encoder{EncoderTimer, isOverTemperature, ledFading};
     OledDisplay oledDisplay{DisplaySpiPeripherie, ledTemperatures, ledFading};
 };

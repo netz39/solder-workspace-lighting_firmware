@@ -7,7 +7,7 @@
 #include "units/si/voltage.hpp"
 
 #include "core/SafeAssert.h"
-#include "leds.hpp"
+#include "led_control/LedFading.hpp"
 #include "wrappers/Task.hpp"
 
 #include <array>

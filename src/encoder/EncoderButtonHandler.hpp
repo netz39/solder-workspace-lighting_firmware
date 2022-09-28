@@ -3,19 +3,19 @@
 
 #include "gcem.hpp"
 #include "helpers/freertos.hpp"
-#include "leds.hpp"
+#include "led_control/LedFading.hpp"
 
 #include "util/Button.hpp"
 #include "wrappers/Task.hpp"
 
 /// encoder button is handled here
-class ButtonHandler : public util::wrappers::TaskWithMemberFunctionBase
+class EncoderButtonHandler : public util::wrappers::TaskWithMemberFunctionBase
 {
 public:
     static constexpr auto ButtonSamplingInterval = 10.0_ms;
     static constexpr auto LongPressTime = 500.0_ms;
 
-    ButtonHandler(LedFading &ledFading)
+    EncoderButtonHandler(LedFading &ledFading)
         : TaskWithMemberFunctionBase("buttonPollingTask", 128, osPriorityBelowNormal6), //
           ledFading(ledFading)
     {

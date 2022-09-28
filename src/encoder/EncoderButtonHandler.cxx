@@ -2,10 +2,9 @@
 #include "main.h"
 #include "task.h"
 
-#include "buttonHandler.hpp"
-#include "leds.hpp"
+#include "EncoderButtonHandler.hpp"
 
-void ButtonHandler::encoderButtonCallback(util::Button::Action action)
+void EncoderButtonHandler::encoderButtonCallback(util::Button::Action action)
 {
     if (action == util::Button::Action::ShortPress)
     {
@@ -24,7 +23,7 @@ void ButtonHandler::encoderButtonCallback(util::Button::Action action)
     }
 }
 
-[[noreturn]] void ButtonHandler::taskMain()
+[[noreturn]] void EncoderButtonHandler::taskMain()
 {
     auto lastWakeTime = xTaskGetTickCount();
 

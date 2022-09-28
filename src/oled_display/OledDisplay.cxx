@@ -2,9 +2,8 @@
 #include "task.h"
 
 #include "OledDisplay.hpp"
-#include "adc.hpp"
 #include "gcem/include/gcem.hpp"
-#include "leds.hpp"
+#include "led_control/LedFading.hpp"
 
 //--------------------------------------------------------------------------------------------------
 void OledDisplay::notifyRenderTaskFromISR()

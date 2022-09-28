@@ -1,7 +1,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "encoder.hpp"
+#include "Encoder.hpp"
 #include "gcem.hpp"
 #include "helpers/freertos.hpp"
 #include "tim.h"

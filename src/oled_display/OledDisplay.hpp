@@ -1,6 +1,6 @@
 #pragma once
 
-#include "adc.hpp"
+#include "analog_to_digital/AnalogToDigital.hpp"
 #include "core/SafeAssert.h"
 #include "helpers/freertos.hpp"
 #include "util/gpio.hpp"

@@ -1,11 +1,10 @@
-#include "adc.h"
 #include "FreeRTOS.h"
+#include "adc.h"
 #include "task.h"
 
-#include "adc.hpp"
+#include "AnalogToDigital.hpp"
 #include "gcem/include/gcem.hpp"
 #include "helpers/freertos.hpp"
-#include "leds.hpp"
 
 #include <algorithm>
 

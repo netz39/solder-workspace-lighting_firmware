@@ -4,8 +4,8 @@
 #include "timers.h"
 
 #include "GammaLUT.hpp"
+#include "led_control/LedFading.hpp"
 #include "helpers/freertos.hpp"
-#include "leds.hpp"
 #include "units/si/frequency.hpp"
 
 #include <climits>
