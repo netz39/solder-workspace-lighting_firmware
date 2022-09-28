@@ -22,8 +22,9 @@ set(core_BUILDCONFIGURATION "embedded")
 
 # Adds the core library
 add_subdirectory(core)
-
-add_subdirectory(src/oled-driver)
+add_subdirectory(src/util)
+add_subdirectory(src/oled_display/oled-driver)
+add_subdirectory(src/gcem)
 
 
 set(INCLUDE_FILES
@@ -31,13 +32,16 @@ set(INCLUDE_FILES
         )
 
 set(Sources
-        src/Button/Button.cxx
-        src/Button/buttonHandler.cxx
-        #src/Application.cxx
-        src/adc.cxx
-        src/encoder.cxx
-        src/leds.cxx
-        src/OledDisplay.cxx
+        src/analog_to_digital/AnalogToDigital.cxx
+
+        src/encoder/EncoderButtonHandler.cxx
+        src/encoder/Encoder.cxx
+
+        src/led_control/LedFading.cxx
+
+        src/oled_display/OledDisplay.cxx
+
+        src/Application.cxx
         )
 
 # Instructs CMake to build your firmware
@@ -54,6 +58,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         core
         freertos
         oled-driver
+        util
+        gcem
         )
 
 # Sets up generation of .list and .bin files after your firmware has generated.

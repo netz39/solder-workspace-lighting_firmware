@@ -2,5 +2,5 @@
 	path = src/gcem
 	url = https://github.com/kthohr/gcem.git
 [submodule "src/oled-driver"]
-	path = src/oled-driver
+	path = src/oled_display/oled-driver
 	url = https://github.com/MG-5/oled-driver.git

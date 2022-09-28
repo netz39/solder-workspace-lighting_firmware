@@ -3,14 +3,17 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "type": "shell",
-    "command": "make",
+    "command": "ninja",
+    "options": {
+        "cwd": "${workspaceFolder}/build"
+    },
     "args": [
         "-j12"
     ],
     "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
+        "focus": true,
         "panel": "shared",
         "showReuseMessage": true,
         "clear": true
