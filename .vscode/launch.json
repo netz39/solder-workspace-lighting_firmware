@@ -9,34 +9,35 @@
             "request": "launch",
             "name": "Debug (ST-LINK)",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/debug/solder_workspace_lighting.elf",
+            "executable": "${workspaceFolder}/build/${workspaceFolderBasename}.elf",
             "servertype": "stutil",
             "device": "STM32L432KB",
-            "runToMain": true
+            "runToEntryPoint": "main"
         },
         {
             "type": "cortex-debug",
             "request": "launch",
             "name": "Debug (J-Link)",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/debug/solder_workspace_lighting.elf",
+            "executable": "${workspaceFolder}/build/${workspaceFolderBasename}.elf",
             "serverpath": "JLinkGDBServer",
             "servertype": "jlink",
             "device": "STM32L432KB",
             "interface": "swd",
-            "runToMain": true
+            "runToEntryPoint": "main"
         },
         {
             "type": "cortex-debug",
             "request": "launch",
             "name": "Debug (J-Link, RTOS-aware)",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/debug/solder_workspace_lighting.elf",
+            "executable": "${workspaceFolder}/build/${workspaceFolderBasename}.elf",
             "serverpath": "JLinkGDBServer",
             "servertype": "jlink",
             "device": "STM32L432KB",
             "interface": "swd",
-            "rtos": "FreeRTOS"
+            "rtos": "FreeRTOS",
+            "runToEntryPoint": "main"
         }
     ]
 }
