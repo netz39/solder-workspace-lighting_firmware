@@ -52,43 +52,8 @@
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for fading */
-osThreadId_t fadingHandle;
-const osThreadAttr_t fading_attributes = {
-  .name = "fading",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal4,
-};
-/* Definitions for encoder */
-osThreadId_t encoderHandle;
-const osThreadAttr_t encoder_attributes = {
-  .name = "encoder",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
-};
-/* Definitions for adc */
-osThreadId_t adcHandle;
-const osThreadAttr_t adc_attributes = {
-  .name = "adc",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal4,
-};
-/* Definitions for ui */
-osThreadId_t uiHandle;
-const osThreadAttr_t ui_attributes = {
-  .name = "ui",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal4,
-};
-/* Definitions for button */
-osThreadId_t buttonHandle;
-const osThreadAttr_t button_attributes = {
-  .name = "button",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal6,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,11 +62,6 @@ const osThreadAttr_t button_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-extern void fadingTask(void *argument);
-extern void encoderTask(void *argument);
-extern void adcTask(void *argument);
-extern void uiTask(void *argument);
-extern void buttonUpdateTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -164,21 +124,6 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of fading */
-  fadingHandle = osThreadNew(fadingTask, NULL, &fading_attributes);
-
-  /* creation of encoder */
-  encoderHandle = osThreadNew(encoderTask, NULL, &encoder_attributes);
-
-  /* creation of adc */
-  adcHandle = osThreadNew(adcTask, NULL, &adc_attributes);
-
-  /* creation of ui */
-  uiHandle = osThreadNew(uiTask, NULL, &ui_attributes);
-
-  /* creation of button */
-  buttonHandle = osThreadNew(buttonUpdateTask, NULL, &button_attributes);
-
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -196,7 +141,7 @@ void MX_FREERTOS_Init(void) {
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+__weak void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */

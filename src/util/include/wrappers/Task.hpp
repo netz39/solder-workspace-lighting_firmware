@@ -1,9 +1,9 @@
 #pragma once
-#include <cmsis_os2.h>
 #include "IFreeRTOSTask.hpp"
 #include "ITaskWithMemberFunction.hpp"
 #include <FreeRTOS.h>
 #include <array>
+#include <cmsis_os2.h>
 #include <event_groups.h>
 #include <functional>
 #include <limits>
@@ -25,9 +25,9 @@ public:
     ~Task() override;
 
     Task(const Task &) = delete;
-    Task(Task && other) noexcept;
+    Task(Task &&other) noexcept;
     Task &operator=(const Task &) = delete;
-    Task &operator=(Task && other) noexcept;
+    Task &operator=(Task &&other) noexcept;
 
     static constexpr uint32_t ClearAllBits = std::numeric_limits<uint32_t>::max();
     int32_t notifyWait(uint32_t ulBitsToClearOnEntry, uint32_t ulBitsToClearOnExit,
@@ -36,6 +36,7 @@ public:
     int32_t notifyFromISR(uint32_t ulValue, NotifyAction eAction,
                           int32_t *pxHigherPriorityTaskWoken) override;
     void notifyGive() override;
+    void notifyGiveFromISR(int32_t *pxHigherPriorityTaskWoken) override;
     void notifyTake(uint32_t waittime) override;
     void delay(units::si::Time time) override;
 

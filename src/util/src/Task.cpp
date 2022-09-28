@@ -85,6 +85,11 @@ void Task::notifyGive()
     xTaskNotifyGive(_handle);
 }
 
+void Task::notifyGiveFromISR(int32_t *pxHigherPriorityTaskWoken)
+{
+    vTaskNotifyGiveFromISR(_handle, pxHigherPriorityTaskWoken);
+}
+
 void Task::notifyTake(const uint32_t waittime)
 {
     ulTaskNotifyTake(pdTRUE, waittime);
@@ -99,17 +104,17 @@ constexpr eNotifyAction Task::notifyActionConverter(const NotifyAction action)
 {
     switch (action)
     {
-        case NotifyAction::NoAction:
-            return eNotifyAction::eNoAction;
-        case NotifyAction::SetBits:
-            return eNotifyAction::eSetBits;
-        case NotifyAction::Increment:
-            return eNotifyAction::eIncrement;
-        case NotifyAction::SetValueWithOverwrite:
-            return eNotifyAction::eSetValueWithOverwrite;
-        default:
-        case NotifyAction::SetValueWithoutOverwrite:
-            return eNotifyAction::eSetValueWithoutOverwrite;
+    case NotifyAction::NoAction:
+        return eNotifyAction::eNoAction;
+    case NotifyAction::SetBits:
+        return eNotifyAction::eSetBits;
+    case NotifyAction::Increment:
+        return eNotifyAction::eIncrement;
+    case NotifyAction::SetValueWithOverwrite:
+        return eNotifyAction::eSetValueWithOverwrite;
+    default:
+    case NotifyAction::SetValueWithoutOverwrite:
+        return eNotifyAction::eSetValueWithoutOverwrite;
     }
 }
 

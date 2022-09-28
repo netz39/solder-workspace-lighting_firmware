@@ -1,53 +1,30 @@
 #include "FreeRTOS.h"
 #include "main.h"
 #include "task.h"
-#include "timers.h"
 
-#include "helpers/freertos.hpp"
+#include "buttonHandler.hpp"
 #include "leds.hpp"
-#include "util/Button.hpp"
-#include "util/gpio.hpp"
 
-extern TimerHandle_t ledIdleTimer;
-extern FadingState fadingState;
-extern TaskHandle_t fadingHandle;
-extern void resetLedIdleTimeout();
-extern FadingState fadingState;
-
-using units::si::Time;
-using util::Button;
-using util::Gpio;
-
-namespace
+void ButtonHandler::encoderButtonCallback(util::Button::Action action)
 {
-constexpr auto ButtonSamplingInterval = 15.0_ms;
-constexpr auto LongPressTime = 500.0_ms;
-
-void encoderButtonCallback(Button::Action action)
-{
-    if (action == Button::Action::ShortPress)
+    if (action == util::Button::Action::ShortPress)
     {
-        resetLedIdleTimeout();
-        targetLedPercentage = DefaultPercentage;
-        fadingState = FadingState::Normal;
-        xTaskNotify(fadingHandle, 1U, eSetBits);
+        ledFading.resetLedIdleTimeout();
+        ledFading.setTargetPercentage(LedFading::DefaultPercentage);
+        ledFading.setFadingState(LedFading::FadingState::Normal);
+        ledFading.notify(1U, util::wrappers::NotifyAction::SetBits);
     }
 
-    else if (action == Button::Action::LongPress)
+    else if (action == util::Button::Action::LongPress)
     {
-        xTimerStop(ledIdleTimer, 0);
-        targetLedPercentage = MinPercentage;
-        fadingState = FadingState::Normal;
-        xTaskNotify(fadingHandle, 1U, eSetBits);
+        ledFading.stopIdleTimer(0);
+        ledFading.setTargetPercentage(LedFading::MinPercentage);
+        ledFading.setFadingState(LedFading::FadingState::Normal);
+        ledFading.notify(1U, util::wrappers::NotifyAction::SetBits);
     }
 }
 
-Button encoderButton({EncoderButton_GPIO_Port, EncoderButton_Pin}, LongPressTime, false,
-                     encoderButtonCallback);
-
-} // namespace
-
-extern "C" void buttonUpdateTask(void *)
+[[noreturn]] void ButtonHandler::taskMain()
 {
     auto lastWakeTime = xTaskGetTickCount();
 

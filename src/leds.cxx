@@ -10,44 +10,24 @@
 
 #include <climits>
 
-extern TaskHandle_t fadingHandle;
-uint8_t targetLedPercentage = DefaultPercentage;
-
-FadingState fadingState = FadingState::Normal;
-
-namespace
-{
-constexpr auto LedTimer = &htim2;
-constexpr auto TaskFrequency = 100.0_Hz;
-
-constexpr auto TimeToFade = 100.0_ms;
-constexpr auto TimeToFadeOff = 5.0_s;
-constexpr auto LedIdleTimout = 45.0_min;
-
-uint8_t currentLedPercentage = MinPercentage;
-} // namespace
-
-void onLedIdleTimeout(TimerHandle_t)
+void LedFading::onLedIdleTimeout()
 {
     fadingState = FadingState::Standby;
     targetLedPercentage = MinPercentage;
-    xTaskNotify(fadingHandle, 1U, eSetBits);
+    notify(1U, util::wrappers::NotifyAction::SetBits);
 }
 
-TimerHandle_t ledIdleTimer =
-    xTimerCreate("ledIdleTimeout", toOsTicks(LedIdleTimout), pdFALSE, nullptr, onLedIdleTimeout);
-
-void resetLedIdleTimeout()
+void LedFading::resetLedIdleTimeout()
 {
     xTimerReset(ledIdleTimer, 0);
 }
 
-extern "C" void fadingTask(void *)
+void LedFading::taskMain()
 {
-    HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Start(LedTimer, TIM_CHANNEL_4);
+    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_4);
 
     resetLedIdleTimeout();
 
@@ -57,7 +37,7 @@ extern "C" void fadingTask(void *)
     while (true)
     {
         if (!restart)
-            xTaskNotifyWait(0, ULONG_MAX, nullptr, portMAX_DELAY);
+            notifyWait(0, ULONG_MAX, nullptr, portMAX_DELAY);
 
         restart = false;
 
@@ -84,10 +64,10 @@ extern "C" void fadingTask(void *)
             currentLedPercentage = targetLedPercentage + (factor * Difference) / NumberOfSteps;
 
             const auto PwmValue = GammaLUT[currentLedPercentage];
-            LedTimer->Instance->CCR1 = PwmValue;
-            LedTimer->Instance->CCR2 = PwmValue;
-            LedTimer->Instance->CCR3 = PwmValue;
-            LedTimer->Instance->CCR4 = PwmValue;
+            ledTimer->Instance->CCR1 = PwmValue;
+            ledTimer->Instance->CCR2 = PwmValue;
+            ledTimer->Instance->CCR3 = PwmValue;
+            ledTimer->Instance->CCR4 = PwmValue;
 
             if (factor == 0)
                 break;
@@ -95,11 +75,10 @@ extern "C" void fadingTask(void *)
             factor--;
 
             uint32_t notifiedValue;
-            xTaskNotifyWait(0, ULONG_MAX, &notifiedValue, toOsTicks(delayTime));
+            notifyWait(0, ULONG_MAX, &notifiedValue, toOsTicks(delayTime));
             if ((notifiedValue & 1U) != 0)
             {
                 // restart fading
-
                 restart = true;
                 break;
             }

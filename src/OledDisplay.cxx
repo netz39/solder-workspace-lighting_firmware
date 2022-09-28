@@ -1,52 +1,25 @@
 #include "FreeRTOS.h"
-#include "queue.h"
-#include "spi.h"
 #include "task.h"
-#include "timers.h"
 
 #include "OledDisplay.hpp"
-#include "SSD1306_SPI.hpp"
 #include "adc.hpp"
 #include "gcem/include/gcem.hpp"
-#include "helpers/freertos.hpp"
 #include "leds.hpp"
-#include "oled-driver/Display.hpp"
-#include "oled-driver/Renderer.hpp"
-
-static SSD1306_SPI ssdi;
-static Display display(ssdi);
-Renderer renderer(OledWidth, OledPages, display);
-
-extern TaskHandle_t uiHandle;
-extern TimerHandle_t ledIdleTimer;
-
-extern "C" void spi1TXCompleteCallback(SPI_HandleTypeDef *);
-
-namespace
-{
-constexpr auto TaskFrequency = 100.0_Hz;
-constexpr auto TimeThresholdToShowCountdown = 9.0_min;
-
-constexpr auto MaximumChars = 22;
-char buffer[MaximumChars];
 
 //--------------------------------------------------------------------------------------------------
-void notifyRenderTask()
+void OledDisplay::notifyRenderTaskFromISR()
 {
     auto higherPriorityTaskWoken = pdFALSE;
-    vTaskNotifyGiveFromISR(uiHandle, &higherPriorityTaskWoken);
+    notifyGiveFromISR(&higherPriorityTaskWoken);
     portYIELD_FROM_ISR(higherPriorityTaskWoken);
 }
 
 //--------------------------------------------------------------------------------------------------
-void initDisplay()
+void OledDisplay::initDisplay()
 {
-    HAL_SPI_RegisterCallback(DisplaySpiPeripherie, HAL_SPI_TX_COMPLETE_CB_ID,
-                             spi1TXCompleteCallback);
-
-    HAL_GPIO_WritePin(DisplayReset_GPIO_Port, DisplayReset_Pin, GPIO_PIN_RESET);
+    displayReset.write(false);
     vTaskDelay(pdMS_TO_TICKS(1));
-    HAL_GPIO_WritePin(DisplayReset_GPIO_Port, DisplayReset_Pin, GPIO_PIN_SET);
+    displayReset.write(true);
     vTaskDelay(pdMS_TO_TICKS(1));
 
     display.setDisplayState(Display::DisplayState::Off);
@@ -66,22 +39,15 @@ void initDisplay()
     display.setDisplayState(Display::DisplayState::On);
 }
 
-} // namespace
-
 //--------------------------------------------------------------------------------------------------
-extern "C" void spi1TXCompleteCallback(SPI_HandleTypeDef *)
-{
-    notifyRenderTask();
-}
-
-//--------------------------------------------------------------------------------------------------
-void waitForTXComplete()
+void OledDisplay::waitForTXComplete()
 {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
 //-----------------------------------------------------------------------------
-void getTemperaturePrint(const units::si::Temperature &temperature, char *buffer, size_t bufferSize)
+void OledDisplay::getTemperaturePrint(const units::si::Temperature &temperature, char *buffer,
+                                      size_t bufferSize)
 {
     if (temperature.getMagnitude() == 0.0f)
         snprintf(buffer, bufferSize, "--°C");
@@ -91,7 +57,7 @@ void getTemperaturePrint(const units::si::Temperature &temperature, char *buffer
 }
 
 //--------------------------------------------------------------------------------------------------
-void drawDisplay()
+void OledDisplay::drawDisplay()
 {
     renderer.clearAll();
 
@@ -103,21 +69,22 @@ void drawDisplay()
     const auto SeperatorColumn2 = OledWidth - (TemperatureTextWidth / 2 + Space) / 2;
     const auto SeperatorColumn3 = OledWidth - (MinutesTextWidth + 4);
 
-    if (!xTimerIsTimerActive(ledIdleTimer) || targetLedPercentage == 0)
+    if (!ledFading.isIdleTimerActive() || ledFading.getTargetPercentage() == 0)
     {
-        xTimerStop(ledIdleTimer, 0);
+        ledFading.stopIdleTimer(0);
         snprintf(buffer, MaximumChars, "STANDBY");
     }
     else
     {
         const auto CountdownRemainingTime =
-            ticksToTime(xTimerGetExpiryTime(ledIdleTimer) - xTaskGetTickCount());
+            ticksToTime(ledFading.getIdleExpiryTime() - xTaskGetTickCount());
         const uint8_t RemainingMinutes =
             gcem::ceil(CountdownRemainingTime.getMagnitude(units::si::scale::min));
 
         if (CountdownRemainingTime <= TimeThresholdToShowCountdown)
         {
-            snprintf(buffer, MaximumChars, "%d%% - %dmin", targetLedPercentage, RemainingMinutes);
+            snprintf(buffer, MaximumChars, "%d%% - %dmin", ledFading.getTargetPercentage(),
+                     RemainingMinutes);
         }
         else
         {
@@ -127,7 +94,7 @@ void drawDisplay()
             renderer.drawVerticalLine(SeperatorColumn3, 0, 0);
             renderer.drawHorizontalLine(1, 0, SeperatorColumn3, OledWidth - 1);
 
-            snprintf(buffer, MaximumChars, "%d%%", targetLedPercentage);
+            snprintf(buffer, MaximumChars, "%d%%", ledFading.getTargetPercentage());
         }
     }
     renderer.print({OledWidth / 2, 0}, buffer, Renderer::Alignment::Center, 2);
@@ -154,7 +121,7 @@ void drawDisplay()
 }
 
 //--------------------------------------------------------------------------------------------------
-extern "C" void uiTask(void *)
+void OledDisplay::taskMain()
 {
     initDisplay();
 

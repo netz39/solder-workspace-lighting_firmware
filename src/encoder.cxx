@@ -1,23 +1,15 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "gcem/include/gcem.hpp"
+#include "encoder.hpp"
+#include "gcem.hpp"
 #include "helpers/freertos.hpp"
-#include "leds.hpp"
 #include "tim.h"
 #include "units/si/frequency.hpp"
 
-extern TaskHandle_t fadingHandle;
-extern FadingState fadingState;
-extern bool isOverTemperature;
-extern void resetLedIdleTimeout();
-
-constexpr auto EncoderTimer = &htim1;
-constexpr auto TaskFrequency = 50.0_Hz;
-
-extern "C" void encoderTask(void *)
+void Encoder::taskMain()
 {
-    HAL_TIM_Encoder_Start(EncoderTimer, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(encoderTimer, TIM_CHANNEL_ALL);
     uint16_t oldEncoderValue = 0;
 
     auto lastWakeTime = xTaskGetTickCount();
@@ -27,39 +19,39 @@ extern "C" void encoderTask(void *)
         vTaskDelayUntil(&lastWakeTime, toOsTicks(TaskFrequency));
 
         // get new encoder value and calc difference
-        const uint16_t EncoderValue = __HAL_TIM_GET_COUNTER(EncoderTimer);
-        int8_t diff = (EncoderValue - oldEncoderValue);
+        const uint16_t EncoderValue = __HAL_TIM_GET_COUNTER(encoderTimer);
+        int diff = (EncoderValue - oldEncoderValue);
 
         if (diff == 0 || gcem::abs(diff) < 4)
             continue;
 
-        resetLedIdleTimeout();
+        ledFading.resetLedIdleTimeout();
 
         // STM encoder timer returns values by factor 4 however
         diff = (diff / 4) * 5;
         oldEncoderValue = EncoderValue;
 
-        int16_t temp = targetLedPercentage;
+        int16_t temp = ledFading.getTargetPercentage();
         temp += diff;
 
-        if (temp < MinPercentage)
-            temp = MinPercentage;
+        if (temp < LedFading::MinPercentage)
+            temp = LedFading::MinPercentage;
 
         else if (!isOverTemperature)
         {
-            if (temp > MaxPercentage)
-                temp = MaxPercentage;
+            if (temp > LedFading::MaxPercentage)
+                temp = LedFading::MaxPercentage;
         }
         else
         {
             // in case of over temperature default is our new maximum
-            if (temp > DefaultPercentage)
-                temp = DefaultPercentage;
+            if (temp > LedFading::DefaultPercentage)
+                temp = LedFading::DefaultPercentage;
         }
 
         // set target LED percentage and start fading
-        targetLedPercentage = temp;
-        fadingState = FadingState::Normal;
-        xTaskNotify(fadingHandle, 1U, eSetBits);
+        ledFading.setTargetPercentage(temp);
+        ledFading.setFadingState(LedFading::FadingState::Normal);
+        ledFading.notify(1U, util::wrappers::NotifyAction::SetBits);
     }
 }

@@ -34,6 +34,7 @@ public:
                                   int32_t *pxHigherPriorityTaskWoken) = 0;
 
     virtual void notifyGive() = 0;
+    virtual void notifyGiveFromISR(int32_t *pxHigherPriorityTaskWoken) = 0;
     virtual void notifyTake(uint32_t waittime) = 0;
     virtual void delay(units::si::Time time) = 0;
 

@@ -10,6 +10,8 @@ namespace util
 class Button
 {
 public:
+    static constexpr units::si::Time DebounceTime = 20.0_ms;
+
     enum class State
     {
         NotPressed = 0,
@@ -56,7 +58,6 @@ private:
     [[nodiscard]] units::si::Time getPassedTime() const;
 
     static constexpr units::si::Time TimerReloadValue = 0.0_s;
-    static constexpr units::si::Time DebounceTime = 20.0_ms;
 
     util::Gpio buttonGpio;
     const units::si::Time LongPressTime = 500.0_ms;

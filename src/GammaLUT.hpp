@@ -22,7 +22,7 @@ constexpr GammaTable createGammaTable()
         const auto Logarithm =
             gcem::pow(static_cast<float>(i) / static_cast<float>(MaximumIn), GammaFactor);
 
-        gammaTable[i] = StartOffset + gcem::round(Logarithm * (MaximumOut - StartOffset));
+        gammaTable[i] = StartOffset + int(gcem::round(Logarithm * (MaximumOut - StartOffset)));
     }
 
     return gammaTable;
