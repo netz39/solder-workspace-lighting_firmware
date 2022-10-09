@@ -1,1 +1,2 @@
-cubemx/**/* export-ignore
+*.c -linguist-detectable
+*.h -linguist-detectable
