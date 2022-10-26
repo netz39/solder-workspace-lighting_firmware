@@ -7,8 +7,8 @@
 #include "wrappers/Task.hpp"
 
 #include "SSD1306_SPI.hpp"
-#include "oled-driver/Display.hpp"
 #include "oled-driver/Renderer.hpp"
+#include "oled-driver/SSD1306.hpp"
 
 class OledDisplay : public util::wrappers::TaskWithMemberFunctionBase
 {
@@ -40,7 +40,7 @@ private:
     LedFading &ledFading;
 
     SSD1306_SPI ssdi{peripherie};
-    Display display{ssdi};
+    SSD1306 display{ssdi};
     Renderer renderer{OledWidth, OledPages, display};
 
     util::Gpio displayReset{DisplayReset_GPIO_Port, DisplayReset_Pin};

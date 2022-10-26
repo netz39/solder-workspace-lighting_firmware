@@ -21,21 +21,21 @@ void OledDisplay::initDisplay()
     displayReset.write(true);
     vTaskDelay(pdMS_TO_TICKS(1));
 
-    display.setDisplayState(Display::DisplayState::Off);
+    display.setDisplayState(SSD1306::DisplayState::Off);
     display.setMultiplexRatio(OledPages * 8 - 1);
     display.setComPinConfig(false, false);
     display.setContrastControl(0xFF);
     display.setDisplayClockDivide(0, 0x8);
     display.setSegmentRemap(false);
-    display.setComOutputMode(Display::ComMode::Normal);
+    display.setComOutputMode(SSD1306::ComMode::Normal);
     display.setPrechargingPeriod(1, 0xF);
     display.setChargePump(true);
 
-    display.setMemoryAddressingMode(Display::AddressingMode::Horizontal);
+    display.setMemoryAddressingMode(SSD1306::AddressingMode::Horizontal);
     display.setPageAddress(0, OledPages - 1);   // pages from 0 to 3
     display.setColumnAddress(0, OledWidth - 1); // columns from 0 to 127
 
-    display.setDisplayState(Display::DisplayState::On);
+    display.setDisplayState(SSD1306::DisplayState::On);
 }
 
 //--------------------------------------------------------------------------------------------------

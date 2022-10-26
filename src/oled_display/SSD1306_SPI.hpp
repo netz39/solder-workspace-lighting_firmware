@@ -3,18 +3,18 @@
 #include "OledDisplay.hpp"
 #include "core/SafeAssert.h"
 #include "main.h"
-#include "oled-driver/SSD1306Interface.hpp"
+#include "oled-driver/SSDInterface.hpp"
 #include "spi.h"
 
 //--------------------------------------------------------------------------------------------------
-//! SPI interface to a SSD1305/6 display controller.
-class SSD1306_SPI : public SSD1306Interface
+//! SPI interface to a SSD1306 display controller.
+class SSD1306_SPI : public SSDInterface
 {
 public:
     static constexpr size_t OledWidth = 128;
     static constexpr size_t OledPages = 4;
 
-    explicit SSD1306_SPI(SPI_HandleTypeDef *peripherie) : SSD1306Interface(), peripherie(peripherie)
+    explicit SSD1306_SPI(SPI_HandleTypeDef *peripherie) : SSDInterface(), peripherie(peripherie)
     {
         SafeAssert(peripherie != nullptr);
     }
