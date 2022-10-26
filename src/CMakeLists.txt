@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0048 NEW)
-project(solder_workspace_lighting_fw LANGUAGES CXX C ASM)
+project(solder-workspace-lighting_firmware LANGUAGES CXX C ASM)
 
 # boilerplate cmake for setting up compiler flags, extraction from cubemx code
 # internal macros and such
