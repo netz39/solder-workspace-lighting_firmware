@@ -25,6 +25,12 @@ void Encoder::taskMain()
         if (diff == 0 || gcem::abs(diff) < 4)
             continue;
 
+        if (diff >= std::numeric_limits<uint16_t>::max() / 2)
+            diff = std::numeric_limits<uint16_t>::max() - diff;
+
+        else if (diff <= -std::numeric_limits<uint16_t>::max() / 2)
+            diff = std::numeric_limits<uint16_t>::max() + diff;
+
         ledFading.resetLedIdleTimeout();
 
         // STM encoder timer returns values by factor 4 however
