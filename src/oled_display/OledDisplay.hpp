@@ -14,7 +14,7 @@ class OledDisplay : public util::wrappers::TaskWithMemberFunctionBase
 {
 public:
     static constexpr size_t OledWidth = SSD1306_SPI::OledWidth;
-    static constexpr size_t OledPages = SSD1306_SPI::OledWidth;
+    static constexpr size_t OledPages = SSD1306_SPI::OledPages;
 
     static constexpr auto TaskFrequency = 100.0_Hz;
     static constexpr auto TimeThresholdToShowCountdown = 9.0_min;
