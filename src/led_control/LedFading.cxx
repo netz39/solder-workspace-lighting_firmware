@@ -10,18 +10,6 @@
 
 #include <climits>
 
-void LedFading::onLedIdleTimeout()
-{
-    fadingState = FadingState::Standby;
-    targetLedPercentage = MinPercentage;
-    notify(1U, util::wrappers::NotifyAction::SetBits);
-}
-
-void LedFading::resetLedIdleTimeout()
-{
-    xTimerReset(ledIdleTimer, 0);
-}
-
 void LedFading::taskMain(void *)
 {
     HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_1);
@@ -84,4 +72,18 @@ void LedFading::taskMain(void *)
             }
         }
     }
+}
+
+// ----------------------------------------------------------------------------
+void LedFading::onLedIdleTimeout()
+{
+    fadingState = FadingState::Standby;
+    targetLedPercentage = MinPercentage;
+    notify(1U, util::wrappers::NotifyAction::SetBits);
+}
+
+// ----------------------------------------------------------------------------
+void LedFading::resetLedIdleTimeout()
+{
+    xTimerReset(ledIdleTimer, 0);
 }

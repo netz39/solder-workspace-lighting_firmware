@@ -13,6 +13,7 @@ using units::si::Temperature;
 using units::si::Voltage;
 using util::wrappers::NotifyAction;
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::taskMain(void *)
 {
     calibrateAdc();
@@ -32,6 +33,7 @@ void AnalogToDigital::taskMain(void *)
     }
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::calculateReferenceVoltage()
 {
     const auto VrefIntCalibration = *VREFINT_CAL_ADDR;
@@ -40,22 +42,26 @@ void AnalogToDigital::calculateReferenceVoltage()
     referenceVoltage = VrefIntCalibration * CalibrationRefVoltage / adcResults[VrefChannel];
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::calibrateAdc()
 {
     HAL_ADCEx_Calibration_Start(peripherie, ADC_SINGLE_ENDED);
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::startConversion()
 {
     HAL_ADC_Start_DMA(peripherie, reinterpret_cast<uint32_t *>(adcResults.data()),
                       TotalChannelNumber);
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::waitUntilConversionFinished()
 {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::conversionCompleteCallback()
 {
     auto higherPriorityTaskWoken = pdFALSE;
@@ -63,6 +69,7 @@ void AnalogToDigital::conversionCompleteCallback()
     portYIELD_FROM_ISR(higherPriorityTaskWoken);
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::calculateTemperatures()
 {
     for (size_t i = 0; i < TemperatureChannelCount; i++)
@@ -87,6 +94,7 @@ void AnalogToDigital::calculateTemperatures()
     }
 }
 
+// ----------------------------------------------------------------------------
 void AnalogToDigital::checkOverTemperature()
 {
     Temperature maximumTemperature =

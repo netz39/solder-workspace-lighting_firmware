@@ -23,6 +23,7 @@ void EncoderButtonHandler::encoderButtonCallback(util::Button::Action action)
     }
 }
 
+// ----------------------------------------------------------------------------
 [[noreturn]] void EncoderButtonHandler::taskMain(void *)
 {
     auto lastWakeTime = xTaskGetTickCount();
