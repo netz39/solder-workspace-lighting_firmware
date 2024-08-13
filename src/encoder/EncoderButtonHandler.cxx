@@ -4,6 +4,19 @@
 
 #include "EncoderButtonHandler.hpp"
 
+[[noreturn]] void EncoderButtonHandler::taskMain(void *)
+{
+    auto lastWakeTime = xTaskGetTickCount();
+
+    while (true)
+    {
+        encoderButton.update(ButtonSamplingInterval);
+
+        vTaskDelayUntil(&lastWakeTime, toOsTicks(ButtonSamplingInterval));
+    }
+}
+
+// ----------------------------------------------------------------------------
 void EncoderButtonHandler::encoderButtonCallback(util::Button::Action action)
 {
     if (action == util::Button::Action::ShortPress)
@@ -20,18 +33,5 @@ void EncoderButtonHandler::encoderButtonCallback(util::Button::Action action)
         ledFading.setTargetPercentage(LedFading::MinPercentage);
         ledFading.setFadingState(LedFading::FadingState::Normal);
         ledFading.notify(1U, util::wrappers::NotifyAction::SetBits);
-    }
-}
-
-// ----------------------------------------------------------------------------
-[[noreturn]] void EncoderButtonHandler::taskMain(void *)
-{
-    auto lastWakeTime = xTaskGetTickCount();
-
-    while (true)
-    {
-        encoderButton.update(ButtonSamplingInterval);
-
-        vTaskDelayUntil(&lastWakeTime, toOsTicks(ButtonSamplingInterval));
     }
 }

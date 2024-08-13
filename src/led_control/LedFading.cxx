@@ -19,7 +19,6 @@ void LedFading::taskMain(void *)
 
     resetLedIdleTimeout();
 
-    auto lastWakeTime = xTaskGetTickCount();
     bool restart = true;
 
     while (true)

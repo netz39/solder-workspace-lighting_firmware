@@ -29,4 +29,6 @@ private:
     TIM_HandleTypeDef *encoderTimer = nullptr;
     bool &isOverTemperature;
     LedFading &ledFading;
+
+    int calculateDiff();
 };

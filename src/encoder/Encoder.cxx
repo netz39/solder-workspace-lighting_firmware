@@ -6,11 +6,11 @@
 #include "helpers/freertos.hpp"
 #include "tim.h"
 #include "units/si/frequency.hpp"
+#include <algorithm>
 
 void Encoder::taskMain(void *)
 {
     HAL_TIM_Encoder_Start(encoderTimer, TIM_CHANNEL_ALL);
-    uint16_t oldEncoderValue = 0;
 
     auto lastWakeTime = xTaskGetTickCount();
 
@@ -19,45 +19,49 @@ void Encoder::taskMain(void *)
         vTaskDelayUntil(&lastWakeTime, toOsTicks(TaskFrequency));
 
         // get new encoder value and calc difference
-        const uint16_t EncoderValue = __HAL_TIM_GET_COUNTER(encoderTimer);
-        int diff = (EncoderValue - oldEncoderValue);
+        int diff = calculateDiff();
 
-        if (diff == 0 || gcem::abs(diff) < 4)
+        if (diff == 0)
             continue;
-
-        if (diff >= std::numeric_limits<uint16_t>::max() / 2)
-            diff = std::numeric_limits<uint16_t>::max() - diff;
-
-        else if (diff <= -std::numeric_limits<uint16_t>::max() / 2)
-            diff = std::numeric_limits<uint16_t>::max() + diff;
 
         ledFading.resetLedIdleTimeout();
 
-        // STM encoder timer returns values by factor 4 however
-        diff = (diff / 4) * 5;
-        oldEncoderValue = EncoderValue;
+        int16_t newTarget = ledFading.getTargetPercentage();
+        constexpr auto PercentageChangeStep = 5;
+        newTarget += diff * PercentageChangeStep;
 
-        int16_t temp = ledFading.getTargetPercentage();
-        temp += diff;
-
-        if (temp < LedFading::MinPercentage)
-            temp = LedFading::MinPercentage;
-
-        else if (!isOverTemperature)
-        {
-            if (temp > LedFading::MaxPercentage)
-                temp = LedFading::MaxPercentage;
-        }
-        else
-        {
-            // in case of over temperature default is our new maximum
-            if (temp > LedFading::DefaultPercentage)
-                temp = LedFading::DefaultPercentage;
-        }
+        newTarget = std::clamp<int16_t>(
+            newTarget, LedFading::MinPercentage,
+            isOverTemperature
+                ? LedFading::DefaultPercentage // in case of over temp, set to max. 80%
+                : LedFading::MaxPercentage);
 
         // set target LED percentage and start fading
-        ledFading.setTargetPercentage(temp);
+        ledFading.setTargetPercentage(newTarget);
         ledFading.setFadingState(LedFading::FadingState::Normal);
         ledFading.notify(1U, util::wrappers::NotifyAction::SetBits);
     }
+}
+
+// ----------------------------------------------------------------------------
+int Encoder::calculateDiff()
+{
+    static uint16_t prevEncoderValue = 0;
+    const uint16_t EncoderValue = __HAL_TIM_GET_COUNTER(encoderTimer);
+    int diff = (EncoderValue - prevEncoderValue);
+
+    if (diff == 0 || gcem::abs(diff) < 4)
+        return 0;
+
+    if (diff >= std::numeric_limits<uint16_t>::max() / 2)
+        diff = std::numeric_limits<uint16_t>::max() - diff;
+
+    else if (diff <= -std::numeric_limits<uint16_t>::max() / 2)
+        diff = std::numeric_limits<uint16_t>::max() + diff;
+
+    // STM encoder timer returns values by factor 4 however
+    diff = (diff / 4);
+    prevEncoderValue = EncoderValue;
+
+    return diff;
 }
