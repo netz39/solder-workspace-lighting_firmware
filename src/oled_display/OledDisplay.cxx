@@ -2,14 +2,14 @@
 #include "task.h"
 
 #include "OledDisplay.hpp"
-#include "gcem/include/gcem.hpp"
+#include "gcem.hpp"
 #include "led_control/LedFading.hpp"
 
 //--------------------------------------------------------------------------------------------------
 void OledDisplay::notifyRenderTaskFromISR()
 {
     auto higherPriorityTaskWoken = pdFALSE;
-    notifyGiveFromISR(&higherPriorityTaskWoken);
+    notifyFromISR(1, util::wrappers::NotifyAction::SetBits, &higherPriorityTaskWoken);
     portYIELD_FROM_ISR(higherPriorityTaskWoken);
 }
 
@@ -120,7 +120,7 @@ void OledDisplay::drawDisplay()
 }
 
 //--------------------------------------------------------------------------------------------------
-void OledDisplay::taskMain()
+void OledDisplay::taskMain(void *)
 {
     initDisplay();
 

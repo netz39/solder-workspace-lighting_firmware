@@ -50,7 +50,7 @@ public:
     void conversionCompleteCallback();
 
 protected:
-    [[noreturn]] void taskMain() override;
+    [[noreturn]] void taskMain(void *) override;
 
 private:
     ADC_HandleTypeDef *peripherie = nullptr;

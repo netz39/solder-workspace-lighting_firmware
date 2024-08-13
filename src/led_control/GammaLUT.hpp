@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gcem/include/gcem.hpp"
+#include "gcem.hpp"
 #include <array>
 #include <cstdint>
 

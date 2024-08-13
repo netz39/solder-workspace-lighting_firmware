@@ -23,7 +23,7 @@ public:
     static constexpr auto TaskFrequency = 50.0_Hz;
 
 protected:
-    [[noreturn]] void taskMain() override;
+    [[noreturn]] void taskMain(void *) override;
 
 private:
     TIM_HandleTypeDef *encoderTimer = nullptr;

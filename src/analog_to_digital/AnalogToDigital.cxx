@@ -3,7 +3,7 @@
 #include "task.h"
 
 #include "AnalogToDigital.hpp"
-#include "gcem/include/gcem.hpp"
+#include "gcem.hpp"
 #include "helpers/freertos.hpp"
 
 #include <algorithm>
@@ -13,7 +13,7 @@ using units::si::Temperature;
 using units::si::Voltage;
 using util::wrappers::NotifyAction;
 
-void AnalogToDigital::taskMain()
+void AnalogToDigital::taskMain(void *)
 {
     calibrateAdc();
     auto lastWakeTime = xTaskGetTickCount();

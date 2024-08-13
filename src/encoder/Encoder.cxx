@@ -7,7 +7,7 @@
 #include "tim.h"
 #include "units/si/frequency.hpp"
 
-void Encoder::taskMain()
+void Encoder::taskMain(void *)
 {
     HAL_TIM_Encoder_Start(encoderTimer, TIM_CHANNEL_ALL);
     uint16_t oldEncoderValue = 0;

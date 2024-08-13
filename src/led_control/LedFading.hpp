@@ -74,7 +74,7 @@ public:
     void onLedIdleTimeout();
 
 protected:
-    [[noreturn]] void taskMain() override;
+    [[noreturn]] void taskMain(void *) override;
 
 private:
     TIM_HandleTypeDef *ledTimer = nullptr;

@@ -26,7 +26,7 @@ public:
     }
 
 protected:
-    [[noreturn]] void taskMain() override;
+    [[noreturn]] void taskMain(void *) override;
 
 private:
     LedFading &ledFading;

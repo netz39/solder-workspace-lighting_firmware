@@ -4,8 +4,8 @@
 #include "timers.h"
 
 #include "GammaLUT.hpp"
-#include "led_control/LedFading.hpp"
 #include "helpers/freertos.hpp"
+#include "led_control/LedFading.hpp"
 #include "units/si/frequency.hpp"
 
 #include <climits>
@@ -22,7 +22,7 @@ void LedFading::resetLedIdleTimeout()
     xTimerReset(ledIdleTimer, 0);
 }
 
-void LedFading::taskMain()
+void LedFading::taskMain(void *)
 {
     HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_2);
