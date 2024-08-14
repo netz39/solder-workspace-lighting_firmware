@@ -1,6 +1,3 @@
-[submodule "src/oled-driver"]
-	path = src/oled_display/oled-driver
-	url = https://github.com/MG-5/oled-driver.git
 [submodule "core"]
 	path = core
 	url = ../../MG-5/core.git
@@ -9,3 +6,7 @@
 	path = src/util
 	url = ../../MG-5/util.git
 	branch = stm32
+[submodule "ssd-display-driver"]
+	path = src/oled_display/ssd-display-driver
+	url = ../../MG-5/ssd-display-driver.git
+	branch = main

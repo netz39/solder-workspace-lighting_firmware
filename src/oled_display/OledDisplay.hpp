@@ -7,8 +7,8 @@
 #include "wrappers/Task.hpp"
 
 #include "SSD1306_SPI.hpp"
-#include "oled-driver/Renderer.hpp"
-#include "oled-driver/SSD1306.hpp"
+#include "display-renderer/Renderer.hpp"
+#include "ssd-display-driver/SSD1306.hpp"
 
 class OledDisplay : public util::wrappers::TaskWithMemberFunctionBase
 {

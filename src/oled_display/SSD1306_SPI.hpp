@@ -3,8 +3,8 @@
 #include "OledDisplay.hpp"
 #include "core/SafeAssert.h"
 #include "main.h"
-#include "oled-driver/SSDInterface.hpp"
 #include "spi.h"
+#include "ssd-display-driver/SSDInterface.hpp"
 
 //--------------------------------------------------------------------------------------------------
 //! SPI interface to a SSD1306 display controller.
@@ -55,6 +55,12 @@ public:
         waitForTXComplete();
 
         setChipSelect(false);
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    void waitUntilIdle() override
+    {
+        // not needed for SSD1306
     }
 
     //--------------------------------------------------------------------------------------------------

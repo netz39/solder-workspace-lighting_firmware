@@ -42,7 +42,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
 
-add_subdirectory(src/oled_display/oled-driver)
+add_subdirectory(src/oled_display/ssd-display-driver)
 add_subdirectory(src/util)
 
 # Add sources to executable
@@ -71,6 +71,6 @@ target_link_libraries(
     ${CMAKE_PROJECT_NAME}
     stm32cubemx
     core
-    oled-driver
+    ssd-display-driver
     util
 )
