@@ -5,6 +5,8 @@
 #include "core/SafeAssert.h"
 #include "helpers/freertos.hpp"
 #include "timers.h"
+#include "util/PwmOutput.hpp"
+#include "util/led/GammaCorrection.hpp"
 #include "wrappers/Task.hpp"
 
 class LedFading : public util::wrappers::TaskWithMemberFunctionBase
@@ -27,12 +29,12 @@ public:
         Standby
     };
 
-    LedFading(TIM_HandleTypeDef *ledTimer, void (*timeoutCallback)(TimerHandle_t xTimer))
+    LedFading(TIM_HandleTypeDef *ledTimerPeripherie, void (*timeoutCallback)(TimerHandle_t xTimer))
         : TaskWithMemberFunctionBase("ledFadingTask", 512, osPriorityNormal4), //
-          ledTimer(ledTimer),                                                  //
+          ledTimerPeripherie(ledTimerPeripherie),                              //
           timeoutCallback(timeoutCallback)
     {
-        SafeAssert(ledTimer != nullptr);
+        SafeAssert(ledTimerPeripherie != nullptr);
 
         ledIdleTimer = xTimerCreate("ledIdleTimeout", toOsTicks(LedIdleTimout), pdFALSE, nullptr,
                                     timeoutCallback);
@@ -77,13 +79,25 @@ protected:
     [[noreturn]] void taskMain(void *) override;
 
 private:
-    TIM_HandleTypeDef *ledTimer = nullptr;
+    TIM_HandleTypeDef *ledTimerPeripherie = nullptr;
     TimerHandle_t ledIdleTimer = nullptr;
 
     FadingState fadingState = FadingState::Normal;
 
     uint8_t currentLedPercentage = MinPercentage;
     uint8_t targetLedPercentage = DefaultPercentage;
+
+    static constexpr auto PwmResolution = 11;
+    static constexpr util::led::pwm::GammaCorrection<PwmResolution> GammaLut{};
+
+    std::array<util::PwmOutput<PwmResolution>, NumberOfLeds> ledSpotArray{
+        util::PwmOutput<PwmResolution>{ledTimerPeripherie, TIM_CHANNEL_1},
+        util::PwmOutput<PwmResolution>{ledTimerPeripherie, TIM_CHANNEL_2},
+        util::PwmOutput<PwmResolution>{ledTimerPeripherie, TIM_CHANNEL_3},
+        util::PwmOutput<PwmResolution>{ledTimerPeripherie, TIM_CHANNEL_4}};
+
+    // map percentage (0-100) to pwm value (0-2047)
+    uint16_t mapPercentageToPwmValue(uint8_t percentage);
 
 public:
     void (*timeoutCallback)(TimerHandle_t);

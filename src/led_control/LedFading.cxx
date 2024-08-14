@@ -3,7 +3,6 @@
 #include "tim.h"
 #include "timers.h"
 
-#include "GammaLUT.hpp"
 #include "helpers/freertos.hpp"
 #include "led_control/LedFading.hpp"
 #include "units/si/frequency.hpp"
@@ -12,13 +11,7 @@
 
 void LedFading::taskMain(void *)
 {
-    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_3);
-    HAL_TIM_PWM_Start(ledTimer, TIM_CHANNEL_4);
-
     resetLedIdleTimeout();
-
     bool restart = true;
 
     while (true)
@@ -28,41 +21,57 @@ void LedFading::taskMain(void *)
 
         restart = false;
 
-        const int8_t Difference = currentLedPercentage - targetLedPercentage;
-        const uint8_t NumberOfSteps = gcem::abs(Difference);
+        int16_t pwmValueDifference = mapPercentageToPwmValue(currentLedPercentage) -
+                                     mapPercentageToPwmValue(targetLedPercentage);
+        uint16_t numberOfSteps = gcem::abs(pwmValueDifference);
 
-        units::si::Time delayTime = 0.0_s;
+        units::si::Time fadeTime = 0.0_s;
         switch (fadingState)
         {
         case FadingState::Normal:
-            delayTime = TimeToFade;
+            fadeTime = TimeToFade;
             break;
 
         case FadingState::Standby:
-            delayTime = TimeToFadeOff;
+            fadeTime = TimeToFadeOff;
             break;
         }
-        delayTime = delayTime / NumberOfSteps;
 
-        uint8_t factor = NumberOfSteps - 1;
+        size_t stepSize = 1;
+        auto delayPerStep = fadeTime / numberOfSteps;
+        const size_t PossibleSteps = toOsTicks(fadeTime);
+
+        if (numberOfSteps > PossibleSteps)
+        {
+            // increase step size to fit into task minimum delay of 1ms
+            const float StepSizeFactor = static_cast<float>(numberOfSteps) / PossibleSteps;
+            stepSize = ceil(StepSizeFactor); // round up to next integer
+
+            // adjust delay per step to frame given fadeTime
+            delayPerStep = 1.0_ms * (stepSize / StepSizeFactor);
+
+            // recalculate number of steps to align it with step size
+            numberOfSteps -= numberOfSteps % stepSize;
+        }
+
+        const bool IsDecreasingPwm = pwmValueDifference > 0;
+
+        // set start point aligned to step size
+        uint16_t currentPwmValue = mapPercentageToPwmValue(targetLedPercentage) -
+                                   (IsDecreasingPwm ? -numberOfSteps : numberOfSteps);
 
         while (true)
         {
-            currentLedPercentage = targetLedPercentage + (factor * Difference) / NumberOfSteps;
+            currentPwmValue += IsDecreasingPwm ? -stepSize : stepSize;
 
-            const auto PwmValue = GammaLUT[currentLedPercentage];
-            ledTimer->Instance->CCR1 = PwmValue;
-            ledTimer->Instance->CCR2 = PwmValue;
-            ledTimer->Instance->CCR3 = PwmValue;
-            ledTimer->Instance->CCR4 = PwmValue;
+            for (auto &ledSpot : ledSpotArray)
+                ledSpot.setPwmValue(GammaLut.GammaCorrectionLUT[currentPwmValue]);
 
-            if (factor == 0)
+            if (currentPwmValue == mapPercentageToPwmValue(targetLedPercentage))
                 break;
 
-            factor--;
-
             uint32_t notifiedValue;
-            notifyWait(0, ULONG_MAX, &notifiedValue, toOsTicks(delayTime));
+            notifyWait(0, ULONG_MAX, &notifiedValue, toOsTicks(delayPerStep));
             if ((notifiedValue & 1U) != 0)
             {
                 // restart fading
@@ -71,6 +80,12 @@ void LedFading::taskMain(void *)
             }
         }
     }
+}
+
+// ----------------------------------------------------------------------------
+uint16_t LedFading::mapPercentageToPwmValue(uint8_t percentage)
+{
+    return (std::min(percentage, (uint8_t)100) * GammaLut.MaxResolutionValue) / 100;
 }
 
 // ----------------------------------------------------------------------------
