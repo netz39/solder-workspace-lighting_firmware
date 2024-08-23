@@ -13,7 +13,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Add custom compiler flags, will also add flags to C++ compiler
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+# charset cp1252 is used to support special characters on OLED display
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -fexec-charset=cp1252")
 
 # Include toolchain file
 include(cubemx/cmake/gcc-arm-none-eabi.cmake)
