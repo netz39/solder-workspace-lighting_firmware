@@ -88,7 +88,7 @@ private:
     uint8_t targetLedPercentage = DefaultPercentage;
 
     static constexpr auto PwmResolution = 11;
-    static constexpr util::led::pwm::GammaCorrection<PwmResolution> GammaLut{};
+    static constexpr util::led::pwm::GammaCorrection<PwmResolution> GammaCorrection{};
 
     std::array<util::PwmOutput<PwmResolution>, NumberOfLeds> ledSpotArray{
         util::PwmOutput<PwmResolution>{ledTimerPeripherie, TIM_CHANNEL_1},
