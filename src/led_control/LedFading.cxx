@@ -63,6 +63,7 @@ void LedFading::taskMain(void *)
         while (true)
         {
             currentPwmValue += IsDecreasingPwm ? -stepSize : stepSize;
+            currentLedPercentage = mapPwmValueToPercentage(currentPwmValue);
 
             for (auto &ledSpot : ledSpotArray)
                 ledSpot.setPwmValue(GammaLut.GammaCorrectionLUT[currentPwmValue]);
@@ -86,6 +87,12 @@ void LedFading::taskMain(void *)
 uint16_t LedFading::mapPercentageToPwmValue(uint8_t percentage)
 {
     return (std::min(percentage, (uint8_t)100) * GammaLut.MaxResolutionValue) / 100;
+}
+
+// ----------------------------------------------------------------------------
+uint8_t LedFading::mapPwmValueToPercentage(uint16_t pwmValue)
+{
+    return (pwmValue * 100) / GammaLut.MaxResolutionValue;
 }
 
 // ----------------------------------------------------------------------------

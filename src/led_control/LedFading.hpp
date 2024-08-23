@@ -99,6 +99,9 @@ private:
     // map percentage (0-100) to pwm value (0-2047)
     uint16_t mapPercentageToPwmValue(uint8_t percentage);
 
+    // map pwm value (0-2047) to percentage (0-100)
+    uint8_t mapPwmValueToPercentage(uint16_t pwmValue);
+
 public:
     void (*timeoutCallback)(TimerHandle_t);
 };
